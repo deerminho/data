@@ -5,343 +5,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>유튜브 조회수 트래커</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
-    <!-- 로그인 모달 -->
-    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-            <div class="flex items-center justify-center mb-6">
-                <div class="bg-purple-100 p-4 rounded-full">
-                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                </div>
-            </div>
-            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">관리자 로그인</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">비밀번호</label>
-                    <input type="password" id="passwordInput" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="관리자 비밀번호 입력">
-                </div>
-                <div id="loginError" class="hidden bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm"></div>
-                <div class="flex gap-3">
-                    <button onclick="closeLogin()" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">취소</button>
-                    <button onclick="handleLogin()" class="flex-1 bg-purple-600 text-white px-4 py-3 rounded-lg hover:bg-purple-700 transition">로그인</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 메인 컨텐츠 -->
-    <div class="max-w-7xl mx-auto p-4">
+<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen p-4">
+    
+    <div class="max-w-7xl mx-auto">
         <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <!-- 헤더 -->
             <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        유튜브 조회수 트래커
-                    </h1>
+                    <h1 class="text-3xl font-bold text-gray-800">🎵 유튜브 조회수 트래커</h1>
                     <p id="lastUpdate" class="text-sm text-gray-500 mt-1"></p>
                 </div>
-                <div class="flex gap-2 flex-wrap">
-                    <button onclick="copyShareLink()" id="copyBtn" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                        </svg>
-                        <span id="copyText">링크 복사</span>
+                <div class="flex gap-2">
+                    <button onclick="copyLink()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        📋 <span id="copyText">링크 복사</span>
                     </button>
-                    <button onclick="saveData()" id="saveBtn" class="hidden flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-                        </svg>
-                        저장하기
+                    <button onclick="toggleAdmin()" id="adminBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                        🔐 관리자
                     </button>
-                    <button onclick="handleLogout()" id="logoutBtn" class="hidden flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                        </svg>
-                        로그아웃
-                    </button>
-                    <button onclick="showLogin()" id="loginBtn" class="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                        관리자
+                    <button onclick="saveData()" id="saveBtn" class="hidden bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        💾 저장
                     </button>
                 </div>
             </div>
 
-            <div id="songsContainer"></div>
+            <!-- 곡 목록 -->
+            <div id="songs"></div>
         </div>
 
-        <div class="text-center text-sm text-gray-500">
-            총 <span id="totalSongs">12</span>곡 | 전체 평균 달성률: 
-            <span id="avgRate" class="font-semibold text-purple-600">0.0%</span>
+        <!-- 전체 통계 -->
+        <div class="text-center text-lg font-semibold text-gray-700">
+            총 12곡 | 전체 평균 달성률: <span id="avgRate" class="text-purple-600">0.0%</span>
         </div>
     </div>
 
+    <!-- 로그인 모달 -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold mb-4">관리자 로그인</h2>
+            <input type="password" id="pwd" placeholder="비밀번호" class="w-full px-4 py-3 border rounded-lg mb-4">
+            <div id="error" class="hidden text-red-600 text-sm mb-4"></div>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 px-4 py-3 border rounded-lg">취소</button>
+                <button onclick="login()" class="flex-1 bg-purple-600 text-white px-4 py-3 rounded-lg">로그인</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
-        const songs = [
-            { id: 'Ghg7vG3NMs4', title: 'Hankyeryeong Pass' },
-            { id: 'ILppFoa3FTI', title: 'Lonely Love' },
-            { id: 'DKgiBUaZXr4', title: 'My Reflection in My Heart' },
-            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE' },
-            { id: '1LlNcwtxsgg', title: 'I\'ll Give You the Love I Have Left' },
-            { id: 'rsW-F7IRGmU', title: 'Just a Friend' },
-            { id: 'H8ZnFKkc7ps', title: 'That Day' },
-            { id: 'q78AVE07wdI', title: 'I will let go' },
-            { id: '0JeQF_nrSmU', title: '내 곁에 있어주 (Stay by My Side) Official MV' },
-            { id: '33xZoSnV5t0', title: 'Stay by My Side(내 곁에 있어주) | 1theK' },
-            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV' },
-            { id: 'C7Y9D4hV3QU', title: 'Hankyeryeong Pass(한계령) | 1theK' }
+        const SONGS = [
+            'Hankyeryeong Pass', 'Lonely Love', 'My Reflection in My Heart',
+            '내 곁에 있어주 | 야외녹음실', "I'll Give You the Love I Have Left",
+            'Just a Friend', 'That Day', 'I will let go',
+            '내 곁에 있어주 Official MV', 'Stay by My Side | 1theK',
+            '한계령 Official MV', 'Hankyeryeong Pass | 1theK'
         ];
 
-        const firebaseConfig = {
+        let isAdmin = false;
+        let db;
+        let data = {
+            times: ['시간1', '시간2', '시간3', '시간4', '시간5'],
+            goals: Array(12).fill(100000),
+            views: Array(12).fill(null).map(() => [0,0,0,0,0])
+        };
+
+        // Firebase 초기화
+        firebase.initializeApp({
             apiKey: "AIzaSyDk0r98Ag5htVKH-vVxUzG52SYNcX1G0sA",
             authDomain: "analog-vol1-mv.firebaseapp.com",
             databaseURL: "https://analog-vol1-mv-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "analog-vol1-mv",
             storageBucket: "analog-vol1-mv.firebasestorage.app",
             messagingSenderId: "40601613117",
-            appId: "1:40601613117:web:de43110328bc627df14b54",
-            measurementId: "G-SRN2TZCE82"
-        };
+            appId: "1:40601613117:web:de43110328bc627df14b54"
+        });
+        db = firebase.database();
 
-        let isAdmin = false;
-        let db;
-        let timeLabels = ['시간1', '시간2', '시간3', '시간4', '시간5'];
-        let goals = songs.map(() => 100000);
-        let viewData = songs.map(() => [0, 0, 0, 0, 0]);
-
-        // Firebase 초기화
-        window.addEventListener('load', function() {
-            renderSongs();
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-
-            // 데이터 로드
-            db.ref('viewTracker').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    timeLabels = data.timeLabels || timeLabels;
-                    goals = data.goals || goals;
-                    viewData = data.viewData || viewData;
-                    if (data.lastUpdate) {
-                        document.getElementById('lastUpdate').textContent = '마지막 업데이트: ' + data.lastUpdate;
-                    }
+        // 데이터 로드
+        db.ref('tracker').on('value', snap => {
+            const val = snap.val();
+            if (val) {
+                data = val;
+                if (val.lastUpdate) {
+                    document.getElementById('lastUpdate').textContent = '마지막 업데이트: ' + val.lastUpdate;
                 }
-                renderSongs();
-            });
+            }
+            render();
         });
 
-        function showLogin() {
-            document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('loginError').classList.add('hidden');
+        function fmt(n) {
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
-        function closeLogin() {
-            document.getElementById('loginModal').classList.add('hidden');
-        }
-
-        function handleLogin() {
-            const password = document.getElementById('passwordInput').value;
-            if (password === 'admin2024') {
-                isAdmin = true;
-                closeLogin();
-                document.getElementById('loginBtn').classList.add('hidden');
-                document.getElementById('saveBtn').classList.remove('hidden');
-                document.getElementById('logoutBtn').classList.remove('hidden');
-                renderSongs();
-            } else {
-                const errorDiv = document.getElementById('loginError');
-                errorDiv.textContent = '비밀번호가 올바르지 않습니다.';
-                errorDiv.classList.remove('hidden');
+        function getLatest(views) {
+            for (let i = 4; i >= 0; i--) {
+                if (views[i] > 0) return views[i];
             }
+            return 0;
         }
 
-        function handleLogout() {
-            isAdmin = false;
-            document.getElementById('loginBtn').classList.remove('hidden');
-            document.getElementById('saveBtn').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.add('hidden');
-            renderSongs();
+        function getRate(views, goal) {
+            const latest = getLatest(views);
+            return goal > 0 ? Math.min((latest / goal) * 100, 100) : 0;
         }
 
-        function saveData() {
-            const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
-            db.ref('viewTracker').set({
-                timeLabels,
-                goals,
-                viewData,
-                lastUpdate: now
-            }).then(() => {
-                alert('저장되었습니다!');
-            });
-        }
+        function render() {
+            let html = '<div class="space-y-4">';
+            let totalRate = 0;
 
-        function copyShareLink() {
-            const url = window.location.href.split('?')[0];
-            navigator.clipboard.writeText(url).then(() => {
-                const btn = document.getElementById('copyText');
-                btn.textContent = '복사됨!';
-                setTimeout(() => {
-                    btn.textContent = '링크 복사';
-                }, 2000);
-            });
-        }
-
-        function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        }
-
-        function getCurrentViews(songIndex) {
-            return viewData[songIndex][4] || 0;
-        }
-
-function getCurrentViews(songIndex) {
-  
-    for (let i = viewData[songIndex].length - 1; i >= 0; i--) {
-        if (viewData[songIndex][i] > 0) {
-            return viewData[songIndex][i];
-        }
-    }
-    return 0;
-}
-
-        function getAchievementRateForTime(songIndex, timeIndex) {
-            const views = viewData[songIndex][timeIndex] || 0;
-            const goal = goals[songIndex];
-            return goal > 0 ? Math.min((views / goal) * 100, 100) : 0;
-        }
-
-        function updateGoal(songIndex, value) {
-            goals[songIndex] = parseInt(value) || 0;
-            renderSongs();
-        }
-
-        function updateView(songIndex, timeIndex, value) {
-            viewData[songIndex][timeIndex] = parseInt(value) || 0;
-            renderSongs();
-        }
-
-        function updateTimeLabel(index, value) {
-            timeLabels[index] = value;
-            renderSongs();
-        }
-
-        function getViewIncrease(songIndex, timeIndex) {
-            if (timeIndex === 0) return 0;
-            const current = viewData[songIndex][timeIndex] || 0;
-            const previous = viewData[songIndex][timeIndex - 1] || 0;
-            return current - previous;
-        }
-
-        function renderSongs() {
-            const container = document.getElementById('songsContainer');
-            if (!container) return;
-            
-            let html = '<div class="space-y-6">';
-
-            songs.forEach((song, songIndex) => {
-                const rate = getAchievementRate(songIndex);
-                const current = getCurrentViews(songIndex);
+            SONGS.forEach((song, i) => {
+                const rate = getRate(data.views[i], data.goals[i]);
+                const latest = getLatest(data.views[i]);
+                totalRate += rate;
 
                 html += `
-                    <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-lg text-gray-800 mb-2">${song.title}</h3>
-                                <div class="flex items-center gap-4 flex-wrap">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm text-gray-600">목표:</span>
-                                        ${isAdmin ? `
-                                            <input type="number" value="${goals[songIndex]}" 
-                                                onchange="updateGoal(${songIndex}, this.value)"
-                                                class="w-32 px-3 py-2 border-2 border-purple-400 rounded-lg text-sm font-semibold bg-yellow-50">
-                                        ` : `
-                                            <span class="font-semibold text-purple-600">${formatNumber(goals[songIndex])}</span>
-                                        `}
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm text-gray-600">현재:</span>
-                                        <span class="font-semibold text-blue-600">${formatNumber(current)}</span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm text-gray-600">달성률:</span>
-                                        <span class="font-bold text-green-600">${rate.toFixed(1)}%</span>
-                                    </div>
+                    <div class="border rounded-xl p-4 bg-gray-50">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="font-bold text-lg">${song}</h3>
+                            <div class="text-right text-sm">
+                                <div>목표: ${isAdmin ? 
+                                    `<input type="number" value="${data.goals[i]}" onchange="data.goals[${i}]=+this.value;render()" 
+                                    class="w-28 px-2 py-1 border-2 border-purple-400 rounded bg-yellow-50 font-bold">` 
+                                    : `<span class="font-bold text-purple-600">${fmt(data.goals[i])}</span>`}
                                 </div>
+                                <div>현재: <span class="font-bold text-blue-600">${fmt(latest)}</span></div>
+                                <div>달성률: <span class="font-bold text-green-600">${rate.toFixed(1)}%</span></div>
                             </div>
                         </div>
-                        <div class="mb-4">
-                            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                                <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-500"
-                                    style="width: ${rate}%"></div>
-                            </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style="width:${rate}%"></div>
                         </div>
                         ${isAdmin ? `
-                            <div class="bg-white rounded-lg p-4 border border-gray-200 overflow-x-auto">
-                                <table class="w-full min-w-[600px]">
-                                    <thead>
-                                        <tr class="border-b border-gray-200">
-                                            <th class="text-left py-2 px-2 text-sm font-semibold text-gray-700">시간</th>
-                                            ${timeLabels.map((label, i) => `
-                                                <th class="py-2 px-2">
-                                                    <input type="text" value="${label}" 
-                                                        onchange="updateTimeLabel(${i}, this.value)"
-                                                        class="w-full px-2 py-1 border border-gray-300 rounded text-sm text-center">
-                                                </th>
-                                            `).join('')}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="py-2 px-2 text-sm text-gray-600">조회수</td>
-                                            ${viewData[songIndex].map((view, i) => `
-                                                <td class="py-2 px-2">
-                                                    <input type="number" value="${view}" 
-                                                        onchange="updateView(${songIndex}, ${i}, this.value)"
-                                                        class="w-full px-2 py-1 border border-gray-300 rounded text-sm text-center">
-                                                </td>
-                                            `).join('')}
-                                        </tr>
-                                        <tr class="border-t border-gray-100">
-                                            <td class="py-2 px-2 text-sm text-gray-600">증가량</td>
-                                            ${viewData[songIndex].map((view, i) => {
-                                                const increase = getViewIncrease(songIndex, i);
-                                                const increaseColor = increase > 0 ? 'text-green-600' : 'text-gray-400';
-                                                return `
-                                                <td class="py-2 px-2 text-center">
-                                                    <span class="text-xs font-semibold ${increaseColor}">
-                                                        ${i > 0 ? '+' + formatNumber(increase) : '-'}
-                                                    </span>
-                                                </td>
-                                            `}).join('')}
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <table class="w-full bg-white rounded-lg overflow-hidden">
+                                <tr class="border-b">
+                                    <th class="p-2 text-sm">시간</th>
+                                    ${data.times.map((t,j) => `<th class="p-2"><input type="text" value="${t}" 
+                                        onchange="data.times[${j}]=this.value;render()" 
+                                        class="w-full px-2 py-1 border rounded text-center text-sm"></th>`).join('')}
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-2 text-sm">조회수</td>
+                                    ${data.views[i].map((v,j) => `<td class="p-2"><input type="number" value="${v}" 
+                                        onchange="data.views[${i}][${j}]=+this.value;render()" 
+                                        class="w-full px-2 py-1 border rounded text-center"></td>`).join('')}
+                                </tr>
+                                <tr>
+                                    <td class="p-2 text-sm text-gray-600">증가량</td>
+                                    ${data.views[i].map((v,j) => {
+                                        const inc = j > 0 ? v - data.views[i][j-1] : 0;
+                                        return `<td class="p-2 text-center text-xs font-bold ${inc > 0 ? 'text-green-600' : 'text-gray-400'}">
+                                            ${j > 0 ? '+' + fmt(inc) : '-'}
+                                        </td>`;
+                                    }).join('')}
+                                </tr>
+                            </table>
                         ` : `
-                            <div class="bg-white rounded-lg p-4 border border-gray-200">
-                                <div class="grid grid-cols-5 gap-2">
-                                    ${timeLabels.map((label, i) => {
-                                        const increase = getViewIncrease(songIndex, i);
-                                        const increaseColor = increase > 0 ? 'text-green-600' : 'text-gray-400';
-                                        const ratePerTime = getAchievementRateForTime(songIndex, i);
-                                        return `
-                                        <div class="text-center">
-                                            <div class="text-xs text-gray-600 mb-1">${label}</div>
-                                            <div class="text-sm font-semibold text-gray-800">${formatNumber(viewData[songIndex][i])}</div>
-                                            ${i > 0 ? `<div class="text-xs ${increaseColor}">+${formatNumber(increase)}</div>` : ''}
-                                            <div class="text-xs font-bold text-purple-600 mt-1">${ratePerTime.toFixed(1)}%</div>
-                                        </div>
-                                    `}).join('')}
-                                </div>
+                            <div class="grid grid-cols-5 gap-2 bg-white rounded-lg p-3">
+                                ${data.times.map((t,j) => {
+                                    const inc = j > 0 ? data.views[i][j] - data.views[i][j-1] : 0;
+                                    const r = data.goals[i] > 0 ? Math.min((data.views[i][j] / data.goals[i]) * 100, 100) : 0;
+                                    return `<div class="text-center">
+                                        <div class="text-xs text-gray-600">${t}</div>
+                                        <div class="font-bold">${fmt(data.views[i][j])}</div>
+                                        ${j > 0 ? `<div class="text-xs text-green-600">+${fmt(inc)}</div>` : ''}
+                                        <div class="text-xs font-bold text-purple-600">${r.toFixed(1)}%</div>
+                                    </div>`;
+                                }).join('')}
                             </div>
                         `}
                     </div>
@@ -349,16 +180,56 @@ function getCurrentViews(songIndex) {
             });
 
             html += '</div>';
-            container.innerHTML = html;
-
-            const avgRate = songs.reduce((sum, _, idx) => sum + getAchievementRate(idx), 0) / songs.length;
-            document.getElementById('avgRate').textContent = avgRate.toFixed(1) + '%';
+            document.getElementById('songs').innerHTML = html;
+            document.getElementById('avgRate').textContent = (totalRate / 12).toFixed(1) + '%';
         }
 
-        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
+        function toggleAdmin() {
+            if (isAdmin) {
+                isAdmin = false;
+                document.getElementById('adminBtn').textContent = '🔐 관리자';
+                document.getElementById('saveBtn').classList.add('hidden');
+                render();
+            } else {
+                document.getElementById('modal').classList.remove('hidden');
+                document.getElementById('pwd').value = '';
+                document.getElementById('error').classList.add('hidden');
+            }
+        }
+
+        function login() {
+            if (document.getElementById('pwd').value === 'admin2024') {
+                isAdmin = true;
+                document.getElementById('adminBtn').textContent = '🚪 로그아웃';
+                document.getElementById('saveBtn').classList.remove('hidden');
+                closeModal();
+                render();
+            } else {
+                document.getElementById('error').textContent = '비밀번호가 틀립니다';
+                document.getElementById('error').classList.remove('hidden');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        function saveData() {
+            data.lastUpdate = new Date().toLocaleString('ko-KR');
+            db.ref('tracker').set(data).then(() => alert('저장 완료!'));
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href.split('?')[0]);
+            document.getElementById('copyText').textContent = '복사됨!';
+            setTimeout(() => document.getElementById('copyText').textContent = '링크 복사', 2000);
+        }
+
+        document.getElementById('pwd').addEventListener('keypress', e => {
+            if (e.key === 'Enter') login();
         });
+
+        render();
     </script>
 </body>
 </html>
-
