@@ -202,11 +202,15 @@
             return viewData[songIndex][4] || 0;
         }
 
-        function getAchievementRate(songIndex) {
-            const current = getCurrentViews(songIndex);
-            const goal = goals[songIndex];
-            return goal > 0 ? Math.min((current / goal) * 100, 100) : 0;
+function getCurrentViews(songIndex) {
+  
+    for (let i = viewData[songIndex].length - 1; i >= 0; i--) {
+        if (viewData[songIndex][i] > 0) {
+            return viewData[songIndex][i];
         }
+    }
+    return 0;
+}
 
         function getAchievementRateForTime(songIndex, timeIndex) {
             const views = viewData[songIndex][timeIndex] || 0;
