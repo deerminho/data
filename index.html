@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>유튜브 랜플 뷰로그</title>
+    <title>유튜브 조회수 트래커</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -21,6 +21,9 @@
                     <p id="lastUpdate" class="text-sm text-gray-500 mt-1"></p>
                 </div>
                 <div class="flex gap-2 text-sm sm:text-base">
+                    <button onclick="toggleV15Sync()" id="syncBtn" class="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 font-bold shadow-md transition">
+                        🔗 V15연동
+                    </button>
                     <button onclick="copyLink()" class="bg-teal-600 text-white px-4 py-2.5 rounded-lg hover:bg-teal-700 font-bold shadow-md transition">
                         📋 <span id="copyText">복사</span>
                     </button>
@@ -34,8 +37,10 @@
             </div>
 
             <div class="bg-gradient-to-r from-teal-100 to-cyan-100 rounded-xl p-4 mb-5 text-center shadow-inner">
-                <div class="text-lg font-bold text-gray-700 mb-2">🔥 V15 총공 연동 🔥</div>
-                <div class="text-sm text-gray-600 mb-3">실시간 자동 동기화 중</div>
+                <div class="text-lg font-bold text-gray-700 mb-2"> ANALOG Vol.1 트래커 </div>
+                <div class="text-sm text-gray-600 mb-3">
+                    <span id="syncStatus" class="font-bold text-gray-500">V15 연동 대기중 (버튼 클릭)</span>
+                </div>
                 <div class="flex justify-center gap-6">
                     <div>
                         <div class="text-xs text-gray-500">전체 평균 달성률</div>
@@ -104,6 +109,7 @@
         ];
 
         let isAdmin = false;
+        let isV15Syncing = false;
         let db;
         let data = {
             times: ["시간1", "시간2", "시간3", "시간4", "시간5"],
@@ -122,18 +128,46 @@
         });
         db = firebase.database();
 
-        // V15 연동: views 경로 실시간 감지
-        db.ref("views").on("value", snap => {
-            const v15Views = snap.val();
-            if (v15Views) {
-                ALL_SONGS.forEach((song, i) => {
-                    if (v15Views[i] !== undefined) {
-                        data.views[i][4] = v15Views[i]; // 마지막 타임에 V15 값 반영
+        // V15 연동: 활성화된 경우에만 views 경로 실시간 감지
+        let v15Listener = null;
+        
+        function toggleV15Sync() {
+            isV15Syncing = !isV15Syncing;
+            const btn = document.getElementById("syncBtn");
+            const status = document.getElementById("syncStatus");
+            
+            if (isV15Syncing) {
+                btn.textContent = "🔗 V15연동중";
+                btn.classList.remove("bg-blue-600", "hover:bg-blue-700");
+                btn.classList.add("bg-green-600", "hover:bg-green-700");
+                status.textContent = "✅ V15 실시간 동기화 활성화";
+                status.className = "font-bold text-green-600";
+                
+                // V15 리스너 시작
+                v15Listener = db.ref("views").on("value", snap => {
+                    const v15Views = snap.val();
+                    if (v15Views) {
+                        ALL_SONGS.forEach((song, i) => {
+                            if (v15Views[i] !== undefined && v15Views[i] > 0) {
+                                data.views[i][4] = v15Views[i];
+                            }
+                        });
+                        render();
                     }
                 });
-                render();
+            } else {
+                btn.textContent = "🔗 V15연동";
+                btn.classList.remove("bg-green-600", "hover:bg-green-700");
+                btn.classList.add("bg-blue-600", "hover:bg-blue-700");
+                status.textContent = "V15 연동 대기중 (버튼 클릭)";
+                status.className = "font-bold text-gray-500";
+                
+                // V15 리스너 중지
+                if (v15Listener) {
+                    db.ref("views").off("value", v15Listener);
+                }
             }
-        });
+        }
 
         // tracker3 데이터 로드
         db.ref("tracker3").on("value", snap => {
@@ -223,7 +257,7 @@
                                     <tr class="border-b border-teal-100">
                                         <td class="p-2 font-bold text-gray-700">조회수</td>
                                         ${data.views[i].map((v,j) => {
-                                            const isV15Linked = j === 4;
+                                            const isV15Linked = j === 4 && isV15Syncing;
                                             return `<td class="p-2 ${isV15Linked ? 'bg-cyan-50' : ''}">
                                                 ${isV15Linked ? 
                                                     `<div class="text-center font-black text-cyan-700">${fmt(v)}<br><span class="text-xs">V15연동</span></div>` :
@@ -252,7 +286,7 @@
                                 ${data.times.map((t,j) => {
                                     const inc = j > 0 ? data.views[i][j] - data.views[i][j-1] : 0;
                                     const r = data.goals[i] > 0 ? Math.min((data.views[i][j] / data.goals[i]) * 100, 100) : 0;
-                                    const isV15Linked = j === 4;
+                                    const isV15Linked = j === 4 && isV15Syncing;
                                     return `<div class="text-center p-2 rounded-lg ${j > 0 && inc > 0 ? "bg-emerald-50" : ""} ${isV15Linked ? "border-2 border-cyan-400" : ""}">
                                         <div class="text-sm font-bold text-gray-600 mb-1">${t}${isV15Linked ? ' 🔗' : ''}</div>
                                         <div class="text-xl font-black text-gray-800 mb-1">${fmt(data.views[i][j])}</div>
@@ -376,7 +410,7 @@
         }
 
         function login() {
-            if (document.getElementById("pwd").value === "@minho0728") {
+            if (document.getElementById("pwd").value === "@minho07284") {
                 isAdmin = true;
                 document.getElementById("adminBtn").textContent = "🚪 로그아웃";
                 document.getElementById("saveBtn").classList.remove("hidden");
@@ -389,7 +423,7 @@
         }
 
         function closeModal() {
-            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("hidden");
         }
 
         function saveData() {
@@ -400,11 +434,15 @@
                 lastUpdate: new Date().toLocaleString("ko-KR")
             };
             db.ref("tracker3").set(saveData).then(() => {
-                // V15 연동: 시간5 값을 views에도 저장
-                data.views.forEach((viewArray, i) => {
-                    db.ref("views/" + i).set(viewArray[4]);
-                });
-                alert("✅ 저장 완료! V15에도 자동 반영됩니다.");
+                if (isV15Syncing) {
+                    // V15 연동 활성화 시에만 views에 저장
+                    data.views.forEach((viewArray, i) => {
+                        db.ref("views/" + i).set(viewArray[4]);
+                    });
+                    alert("✅ 저장 완료! V15에도 반영됩니다.");
+                } else {
+                    alert("✅ 저장 완료!");
+                }
             });
         }
 
