@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>랜플 뷰로그</title>
+    <title>유튜브 랜플 뷰로그</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 p-3 sm:p-6">
@@ -33,7 +33,23 @@
                 <span id="avgRate" class="text-3xl font-black text-teal-700">0.0%</span>
             </div>
 
-            <div id="songs" class="space-y-4"></div>
+            <!-- V13 곡들 -->
+            <div class="mb-6">
+                <h2 class="text-xl font-black text-gray-700 mb-3 flex items-center gap-2">
+                    <span class="bg-teal-600 text-white px-3 py-1 rounded-lg text-sm">V13</span>
+                    시간대별 기록
+                </h2>
+                <div id="v13songs" class="space-y-4"></div>
+            </div>
+
+            <!-- 총공 곡들 -->
+            <div>
+                <h2 class="text-xl font-black text-gray-700 mb-3 flex items-center gap-2">
+                    <span class="bg-rose-600 text-white px-3 py-1 rounded-lg text-sm">총공</span>
+                    시작/종료만 기록 (자동 연동)
+                </h2>
+                <div id="totalsongs" class="space-y-4"></div>
+            </div>
         </div>
     </div>
 
@@ -52,27 +68,34 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
-        const SONGS = [
-            "Hankyeryeong Pass",
-            "Lonely Love",
-            "My Reflection in My Heart",
-            "내 곁에 있어주 (야외녹음)",
-            "I will Give You the Love I Have Left",
-            "Just a Friend",
-            "That Day",
-            "I will let go",
-            "내 곁에 있어주 MV",
-            "Stay by My Side (1theK)",
-            "한계령 MV",
-            "Hankyeryeong Pass (1theK)"
+        const V13_SONGS = [
+            { name: "Hankyeryeong Pass", totalIndex: 0 },
+            { name: "Lonely Love", totalIndex: -1 },
+            { name: "My Reflection in My Heart", totalIndex: -1 },
+            { name: "내 곁에 있어주 (야외녹음)", totalIndex: 1 },
+            { name: "I will Give You the Love I Have Left", totalIndex: -1 },
+            { name: "Just a Friend", totalIndex: -1 },
+            { name: "That Day", totalIndex: -1 },
+            { name: "I will let go", totalIndex: -1 }
+        ];
+
+        const TOTAL_SONGS = [
+            { name: "한계령 MV", v13Index: 0 },
+            { name: "내 곁에 있어주 MV", v13Index: 3 }
         ];
 
         let isAdmin = false;
         let db;
         let data = {
             times: ["시간1", "시간2", "시간3", "시간4", "시간5"],
-            goals: Array(12).fill(100000),
-            views: Array(12).fill(null).map(() => [0,0,0,0,0])
+            v13: {
+                goals: Array(8).fill(100000),
+                views: Array(8).fill(null).map(() => [0,0,0,0,0])
+            },
+            total: {
+                goals: Array(2).fill(100000),
+                views: Array(2).fill(null).map(() => [0,0])
+            }
         };
 
         firebase.initializeApp({
@@ -86,7 +109,7 @@
         });
         db = firebase.database();
 
-        db.ref("tracker").on("value", snap => {
+        db.ref("tracker2").on("value", snap => {
             const val = snap.val();
             if (val) {
                 data = val;
@@ -94,15 +117,26 @@
                     document.getElementById("lastUpdate").textContent = "업데이트: " + val.lastUpdate;
                 }
             }
+            syncTotalFromV13();
             render();
         });
+
+        function syncTotalFromV13() {
+            TOTAL_SONGS.forEach((song, totalIdx) => {
+                if (song.v13Index >= 0) {
+                    const v13Views = data.v13.views[song.v13Index];
+                    const lastV13 = v13Views[4];
+                    data.total.views[totalIdx][1] = lastV13;
+                }
+            });
+        }
 
         function fmt(n) {
             return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
         function getLatest(views) {
-            for (let i = 4; i >= 0; i--) {
+            for (let i = views.length - 1; i >= 0; i--) {
                 if (views[i] > 0) return views[i];
             }
             return 0;
@@ -113,26 +147,26 @@
             return goal > 0 ? Math.min((latest / goal) * 100, 100) : 0;
         }
 
-        function render() {
+        function renderV13() {
             let html = "";
             let totalRate = 0;
 
-            SONGS.forEach((song, i) => {
-                const rate = getRate(data.views[i], data.goals[i]);
-                const latest = getLatest(data.views[i]);
+            V13_SONGS.forEach((song, i) => {
+                const rate = getRate(data.v13.views[i], data.v13.goals[i]);
+                const latest = getLatest(data.v13.views[i]);
                 totalRate += rate;
 
                 html += `
                     <div class="border-2 border-teal-200 rounded-xl p-4 bg-gradient-to-br from-white to-teal-50 shadow-lg">
                         <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-black text-xl text-gray-800 flex-1">${song}</h3>
+                            <h3 class="font-black text-xl text-gray-800 flex-1">${song.name}</h3>
                             <div class="flex gap-4 text-base ml-3">
                                 <div class="text-center">
                                     <div class="text-xs text-gray-500">목표</div>
                                     ${isAdmin ? 
-                                        `<input type="number" value="${data.goals[i]}" onchange="data.goals[${i}]=+this.value;render()" 
+                                        `<input type="number" value="${data.v13.goals[i]}" onchange="updateV13Goal(${i}, this.value)" 
                                         class="w-24 px-2 py-1 border-2 border-amber-400 rounded-lg bg-amber-50 font-black text-base text-center">` 
-                                        : `<div class="font-black text-lg text-teal-700">${fmt(data.goals[i])}</div>`}
+                                        : `<div class="font-black text-lg text-teal-700">${fmt(data.v13.goals[i])}</div>`}
                                 </div>
                                 <div class="text-center">
                                     <div class="text-xs text-gray-500">현재</div>
@@ -153,19 +187,19 @@
                                     <tr class="border-b-2 border-teal-200">
                                         <th class="p-2 text-left font-bold">시간</th>
                                         ${data.times.map((t,j) => `<th class="p-2"><input type="text" value="${t}" 
-                                            onchange="data.times[${j}]=this.value;render()" 
+                                            onchange="updateTime(${j}, this.value)" 
                                             class="w-full px-2 py-1 border-2 border-teal-300 rounded text-center font-bold"></th>`).join("")}
                                     </tr>
                                     <tr class="border-b border-teal-100">
                                         <td class="p-2 font-bold text-gray-700">조회수</td>
-                                        ${data.views[i].map((v,j) => `<td class="p-2"><input type="number" value="${v}" 
-                                            onchange="data.views[${i}][${j}]=+this.value;render()" 
+                                        ${data.v13.views[i].map((v,j) => `<td class="p-2"><input type="number" value="${v}" 
+                                            onchange="updateV13View(${i}, ${j}, this.value)" 
                                             class="w-full px-2 py-1 border-2 border-gray-300 rounded text-center font-semibold"></td>`).join("")}
                                     </tr>
                                     <tr>
                                         <td class="p-2 font-bold text-gray-700">증가</td>
-                                        ${data.views[i].map((v,j) => {
-                                            const inc = j > 0 ? v - data.views[i][j-1] : 0;
+                                        ${data.v13.views[i].map((v,j) => {
+                                            const inc = j > 0 ? v - data.v13.views[i][j-1] : 0;
                                             return `<td class="p-2 text-center">
                                                 <div class="font-black text-base ${inc > 0 ? "text-emerald-600" : "text-gray-300"}">
                                                     ${j > 0 ? "+" + fmt(inc) : "-"}
@@ -178,11 +212,11 @@
                         ` : `
                             <div class="grid grid-cols-5 gap-2 bg-white rounded-lg p-3 shadow-inner border border-teal-100">
                                 ${data.times.map((t,j) => {
-                                    const inc = j > 0 ? data.views[i][j] - data.views[i][j-1] : 0;
-                                    const r = data.goals[i] > 0 ? Math.min((data.views[i][j] / data.goals[i]) * 100, 100) : 0;
+                                    const inc = j > 0 ? data.v13.views[i][j] - data.v13.views[i][j-1] : 0;
+                                    const r = data.v13.goals[i] > 0 ? Math.min((data.v13.views[i][j] / data.v13.goals[i]) * 100, 100) : 0;
                                     return `<div class="text-center p-2 rounded-lg ${j > 0 && inc > 0 ? "bg-emerald-50" : ""}">
                                         <div class="text-sm font-bold text-gray-600 mb-1">${t}</div>
-                                        <div class="text-xl font-black text-gray-800 mb-1">${fmt(data.views[i][j])}</div>
+                                        <div class="text-xl font-black text-gray-800 mb-1">${fmt(data.v13.views[i][j])}</div>
                                         ${j > 0 ? `<div class="text-lg font-black text-emerald-600 mb-1">+${fmt(inc)}</div>` : `<div class="h-7"></div>`}
                                         <div class="text-base font-black text-teal-600">${r.toFixed(1)}%</div>
                                     </div>`;
@@ -193,8 +227,138 @@
                 `;
             });
 
-            document.getElementById("songs").innerHTML = html;
-            document.getElementById("avgRate").textContent = (totalRate / SONGS.length).toFixed(1) + "%";
+            document.getElementById("v13songs").innerHTML = html;
+            return totalRate;
+        }
+
+        function renderTotal() {
+            let html = "";
+            let totalRate = 0;
+
+            TOTAL_SONGS.forEach((song, i) => {
+                const rate = getRate(data.total.views[i], data.total.goals[i]);
+                const latest = getLatest(data.total.views[i]);
+                const increase = data.total.views[i][1] - data.total.views[i][0];
+                totalRate += rate;
+
+                const isLinked = song.v13Index >= 0;
+
+                html += `
+                    <div class="border-2 border-rose-200 rounded-xl p-4 bg-gradient-to-br from-white to-rose-50 shadow-lg">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex-1">
+                                <h3 class="font-black text-xl text-gray-800">${song.name}</h3>
+                                ${isLinked ? `<div class="text-xs text-rose-600 font-bold mt-1">🔗 ${V13_SONGS[song.v13Index].name} 연동</div>` : ''}
+                            </div>
+                            <div class="flex gap-4 text-base ml-3">
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500">목표</div>
+                                    ${isAdmin ? 
+                                        `<input type="number" value="${data.total.goals[i]}" onchange="updateTotalGoal(${i}, this.value)" 
+                                        class="w-24 px-2 py-1 border-2 border-amber-400 rounded-lg bg-amber-50 font-black text-base text-center">` 
+                                        : `<div class="font-black text-lg text-teal-700">${fmt(data.total.goals[i])}</div>`}
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500">현재</div>
+                                    <div class="font-black text-lg text-blue-600">${fmt(latest)}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500">달성</div>
+                                    <div class="font-black text-lg text-emerald-600">${rate.toFixed(1)}%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 mb-3 shadow-inner">
+                            <div class="bg-gradient-to-r from-rose-500 via-pink-500 to-red-500 h-3 rounded-full shadow-md" style="width:${rate}%"></div>
+                        </div>
+                        ${isAdmin ? `
+                            <div class="bg-white rounded-lg p-3 shadow-inner border border-rose-100">
+                                <table class="w-full text-base">
+                                    <tr class="border-b-2 border-rose-200">
+                                        <th class="p-3 text-left font-bold w-24">시점</th>
+                                        <th class="p-3 font-bold">시작</th>
+                                        <th class="p-3 font-bold ${isLinked ? 'bg-gray-100' : ''}">종료 ${isLinked ? '(자동)' : ''}</th>
+                                        <th class="p-3 font-bold">증가량</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-bold text-gray-700">조회수</td>
+                                        <td class="p-3">
+                                            <input type="number" value="${data.total.views[i][0]}" 
+                                                onchange="updateTotalView(${i}, 0, this.value)" 
+                                                class="w-full px-2 py-2 border-2 border-gray-300 rounded text-center font-semibold text-base">
+                                        </td>
+                                        <td class="p-3 ${isLinked ? 'bg-gray-100' : ''}">
+                                            ${isLinked ? 
+                                                `<div class="font-black text-lg text-gray-600 text-center">${fmt(data.total.views[i][1])}</div>` :
+                                                `<input type="number" value="${data.total.views[i][1]}" 
+                                                    onchange="updateTotalView(${i}, 1, this.value)" 
+                                                    class="w-full px-2 py-2 border-2 border-gray-300 rounded text-center font-semibold text-base">`
+                                            }
+                                        </td>
+                                        <td class="p-3 text-center">
+                                            <div class="font-black text-xl ${increase > 0 ? "text-emerald-600" : "text-gray-300"}">
+                                                +${fmt(increase)}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-3 gap-3 bg-white rounded-lg p-4 shadow-inner border border-rose-100">
+                                <div class="text-center p-3 rounded-lg">
+                                    <div class="text-sm font-bold text-gray-600 mb-2">시작</div>
+                                    <div class="text-2xl font-black text-gray-800">${fmt(data.total.views[i][0])}</div>
+                                </div>
+                                <div class="text-center p-3 rounded-lg ${increase > 0 ? "bg-emerald-50" : ""}">
+                                    <div class="text-sm font-bold text-gray-600 mb-2">증가</div>
+                                    <div class="text-2xl font-black text-emerald-600">+${fmt(increase)}</div>
+                                    <div class="text-base font-black text-teal-600 mt-1">${rate.toFixed(1)}%</div>
+                                </div>
+                                <div class="text-center p-3 rounded-lg">
+                                    <div class="text-sm font-bold text-gray-600 mb-2">종료 ${isLinked ? '(자동)' : ''}</div>
+                                    <div class="text-2xl font-black text-blue-600">${fmt(data.total.views[i][1])}</div>
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                `;
+            });
+
+            document.getElementById("totalsongs").innerHTML = html;
+            return totalRate;
+        }
+
+        function render() {
+            const v13Rate = renderV13();
+            const totalRate = renderTotal();
+            const avgRate = (v13Rate + totalRate) / (V13_SONGS.length + TOTAL_SONGS.length);
+            document.getElementById("avgRate").textContent = avgRate.toFixed(1) + "%";
+        }
+
+        function updateTime(idx, val) {
+            data.times[idx] = val;
+            render();
+        }
+
+        function updateV13Goal(idx, val) {
+            data.v13.goals[idx] = +val;
+            render();
+        }
+
+        function updateV13View(songIdx, timeIdx, val) {
+            data.v13.views[songIdx][timeIdx] = +val;
+            syncTotalFromV13();
+            render();
+        }
+
+        function updateTotalGoal(idx, val) {
+            data.total.goals[idx] = +val;
+            render();
+        }
+
+        function updateTotalView(songIdx, timeIdx, val) {
+            data.total.views[songIdx][timeIdx] = +val;
+            render();
         }
 
         function toggleAdmin() {
@@ -211,7 +375,7 @@
         }
 
         function login() {
-            if (document.getElementById("pwd").value === "admin2024") {
+            if (document.getElementById("pwd").value === "@minho0728") {
                 isAdmin = true;
                 document.getElementById("adminBtn").textContent = "🚪 로그아웃";
                 document.getElementById("saveBtn").classList.remove("hidden");
@@ -229,7 +393,7 @@
 
         function saveData() {
             data.lastUpdate = new Date().toLocaleString("ko-KR");
-            db.ref("tracker").set(data).then(() => alert("저장 완료!"));
+            db.ref("tracker2").set(data).then(() => alert("저장 완료!"));
         }
 
         function copyLink() {
