@@ -3,51 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analog Vol1. 유튜브 조회수</title>
+    <title>유튜브 조회수 트래커</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen p-4">
+<body class="bg-gradient-to-br from-purple-50 to-pink-50 p-2 sm:p-4">
     
-    <div class="max-w-7xl mx-auto">
-        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
-            <!-- 헤더 -->
-            <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-3 sm:p-4 mb-3">
+            <div class="flex items-center justify-between mb-3 gap-2">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">🎵 Analog Vol1. 유튜브 조회수 증감</h1>
-                    <p id="lastUpdate" class="text-sm text-gray-500 mt-1"></p>
+                    <h1 class="text-lg sm:text-xl font-bold text-gray-800">🎵 조회수 트래커</h1>
+                    <p id="lastUpdate" class="text-xs text-gray-500"></p>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="copyLink()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                        📋 <span id="copyText">링크 복사</span>
+                <div class="flex gap-1 sm:gap-2 text-xs sm:text-sm">
+                    <button onclick="copyLink()" class="bg-blue-600 text-white px-2 sm:px-3 py-1.5 rounded hover:bg-blue-700">
+                        📋 <span id="copyText">복사</span>
                     </button>
-                    <button onclick="toggleAdmin()" id="adminBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-                        🔐 관리자
+                    <button onclick="toggleAdmin()" id="adminBtn" class="bg-purple-600 text-white px-2 sm:px-3 py-1.5 rounded hover:bg-purple-700">
+                        🔐 관리
                     </button>
-                    <button onclick="saveData()" id="saveBtn" class="hidden bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    <button onclick="saveData()" id="saveBtn" class="hidden bg-green-600 text-white px-2 sm:px-3 py-1.5 rounded hover:bg-green-700">
                         💾 저장
                     </button>
                 </div>
             </div>
 
-            <!-- 곡 목록 -->
-            <div id="songs"></div>
-        </div>
+            <div class="bg-purple-50 rounded-lg p-2 mb-3 text-center">
+                <span class="text-sm font-semibold text-gray-700">전체 평균 달성률: </span>
+                <span id="avgRate" class="text-lg font-bold text-purple-600">0.0%</span>
+            </div>
 
-        <!-- 전체 통계 -->
-        <div class="text-center text-lg font-semibold text-gray-700">
-            총 12곡 | 전체 평균 달성률: <span id="avgRate" class="text-purple-600">0.0%</span>
+            <div id="songs" class="space-y-2"></div>
         </div>
     </div>
 
-    <!-- 로그인 모달 -->
-    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-            <h2 class="text-2xl font-bold mb-4">관리자 로그인</h2>
-            <input type="password" id="pwd" placeholder="비밀번호" class="w-full px-4 py-3 border rounded-lg mb-4">
-            <div id="error" class="hidden text-red-600 text-sm mb-4"></div>
-            <div class="flex gap-3">
-                <button onclick="closeModal()" class="flex-1 px-4 py-3 border rounded-lg">취소</button>
-                <button onclick="login()" class="flex-1 bg-purple-600 text-white px-4 py-3 rounded-lg">로그인</button>
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h2 class="text-xl font-bold mb-3">관리자 로그인</h2>
+            <input type="password" id="pwd" placeholder="비밀번호" class="w-full px-3 py-2 border rounded mb-3">
+            <div id="error" class="hidden text-red-600 text-sm mb-3"></div>
+            <div class="flex gap-2">
+                <button onclick="closeModal()" class="flex-1 px-3 py-2 border rounded">취소</button>
+                <button onclick="login()" class="flex-1 bg-purple-600 text-white px-3 py-2 rounded">로그인</button>
             </div>
         </div>
     </div>
@@ -56,22 +53,28 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
         const SONGS = [
-            'Hankyeryeong Pass', 'Lonely Love', 'My Reflection in My Heart',
-            '내 곁에 있어주 | 야외녹음실', "I'll Give You the Love I Have Left",
-            'Just a Friend', 'That Day', 'I will let go',
-            '내 곁에 있어주 Official MV', 'Stay by My Side | 1theK',
-            '한계령 Official MV', 'Hankyeryeong Pass | 1theK'
+            "Hankyeryeong Pass",
+            "Lonely Love",
+            "My Reflection in My Heart",
+            "내 곁에 있어주 (야외녹음)",
+            "I will Give You the Love I Have Left",
+            "Just a Friend",
+            "That Day",
+            "I will let go",
+            "내 곁에 있어주 MV",
+            "Stay by My Side (1theK)",
+            "한계령 MV",
+            "Hankyeryeong Pass (1theK)"
         ];
 
         let isAdmin = false;
         let db;
         let data = {
-            times: ['시간1', '시간2', '시간3', '시간4', '시간5'],
+            times: ["시간1", "시간2", "시간3", "시간4", "시간5"],
             goals: Array(12).fill(100000),
             views: Array(12).fill(null).map(() => [0,0,0,0,0])
         };
 
-        // Firebase 초기화
         firebase.initializeApp({
             apiKey: "AIzaSyDk0r98Ag5htVKH-vVxUzG52SYNcX1G0sA",
             authDomain: "analog-vol1-mv.firebaseapp.com",
@@ -83,20 +86,20 @@
         });
         db = firebase.database();
 
-        // 데이터 로드
-        db.ref('tracker').on('value', snap => {
+        db.ref("tracker").on("value", snap => {
             const val = snap.val();
             if (val) {
                 data = val;
                 if (val.lastUpdate) {
-                    document.getElementById('lastUpdate').textContent = '마지막 업데이트: ' + val.lastUpdate;
+                    document.getElementById("lastUpdate").textContent = "업데이트: " + val.lastUpdate;
                 }
             }
             render();
         });
 
         function fmt(n) {
-            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            if (n >= 10000) return (n/10000).toFixed(1) + "만";
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
         function getLatest(views) {
@@ -112,7 +115,7 @@
         }
 
         function render() {
-            let html = '<div class="space-y-4">';
+            let html = "";
             let totalRate = 0;
 
             SONGS.forEach((song, i) => {
@@ -121,118 +124,117 @@
                 totalRate += rate;
 
                 html += `
-                    <div class="border rounded-xl p-4 bg-gray-50">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="font-bold text-lg">${song}</h3>
-                            <div class="text-right text-sm">
+                    <div class="border rounded-lg p-2 bg-gray-50">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <h3 class="font-bold text-sm sm:text-base truncate flex-1">${song}</h3>
+                            <div class="flex gap-2 sm:gap-3 text-xs ml-2">
                                 <div>목표: ${isAdmin ? 
                                     `<input type="number" value="${data.goals[i]}" onchange="data.goals[${i}]=+this.value;render()" 
-                                    class="w-28 px-2 py-1 border-2 border-purple-400 rounded bg-yellow-50 font-bold">` 
-                                    : `<span class="font-bold text-purple-600">${fmt(data.goals[i])}</span>`}
+                                    class="w-16 sm:w-20 px-1 py-0.5 border-2 border-purple-400 rounded bg-yellow-50 font-bold text-xs">` 
+                                    : `<b class="text-purple-600">${fmt(data.goals[i])}</b>`}
                                 </div>
-                                <div>현재: <span class="font-bold text-blue-600">${fmt(latest)}</span></div>
-                                <div>달성률: <span class="font-bold text-green-600">${rate.toFixed(1)}%</span></div>
+                                <div>현재: <b class="text-blue-600">${fmt(latest)}</b></div>
+                                <div>달성: <b class="text-green-600">${rate.toFixed(1)}%</b></div>
                             </div>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
-                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style="width:${rate}%"></div>
+                        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-1.5 rounded-full" style="width:${rate}%"></div>
                         </div>
                         ${isAdmin ? `
-                            <table class="w-full bg-white rounded-lg overflow-hidden">
-                                <tr class="border-b">
-                                    <th class="p-2 text-sm">시간</th>
-                                    ${data.times.map((t,j) => `<th class="p-2"><input type="text" value="${t}" 
-                                        onchange="data.times[${j}]=this.value;render()" 
-                                        class="w-full px-2 py-1 border rounded text-center text-sm"></th>`).join('')}
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="p-2 text-sm">조회수</td>
-                                    ${data.views[i].map((v,j) => `<td class="p-2"><input type="number" value="${v}" 
-                                        onchange="data.views[${i}][${j}]=+this.value;render()" 
-                                        class="w-full px-2 py-1 border rounded text-center"></td>`).join('')}
-                                </tr>
-                                <tr>
-                                    <td class="p-2 text-sm text-gray-600">증가량</td>
-                                    ${data.views[i].map((v,j) => {
-                                        const inc = j > 0 ? v - data.views[i][j-1] : 0;
-                                        return `<td class="p-2 text-center text-xs font-bold ${inc > 0 ? 'text-green-600' : 'text-gray-400'}">
-                                            ${j > 0 ? '+' + fmt(inc) : '-'}
-                                        </td>`;
-                                    }).join('')}
-                                </tr>
-                            </table>
+                            <div class="bg-white rounded p-2 overflow-x-auto">
+                                <table class="w-full text-xs">
+                                    <tr class="border-b">
+                                        <th class="p-1 text-left">시간</th>
+                                        ${data.times.map((t,j) => `<th class="p-1"><input type="text" value="${t}" 
+                                            onchange="data.times[${j}]=this.value;render()" 
+                                            class="w-full px-1 py-0.5 border rounded text-center"></th>`).join("")}
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="p-1">조회수</td>
+                                        ${data.views[i].map((v,j) => `<td class="p-1"><input type="number" value="${v}" 
+                                            onchange="data.views[${i}][${j}]=+this.value;render()" 
+                                            class="w-full px-1 py-0.5 border rounded text-center"></td>`).join("")}
+                                    </tr>
+                                    <tr>
+                                        <td class="p-1 text-gray-600">증가</td>
+                                        ${data.views[i].map((v,j) => {
+                                            const inc = j > 0 ? v - data.views[i][j-1] : 0;
+                                            return `<td class="p-1 text-center font-bold ${inc > 0 ? "text-green-600" : "text-gray-400"}">
+                                                ${j > 0 ? "+" + fmt(inc) : "-"}
+                                            </td>`;
+                                        }).join("")}
+                                    </tr>
+                                </table>
+                            </div>
                         ` : `
-                            <div class="grid grid-cols-5 gap-2 bg-white rounded-lg p-3">
+                            <div class="grid grid-cols-5 gap-1 bg-white rounded p-2">
                                 ${data.times.map((t,j) => {
                                     const inc = j > 0 ? data.views[i][j] - data.views[i][j-1] : 0;
                                     const r = data.goals[i] > 0 ? Math.min((data.views[i][j] / data.goals[i]) * 100, 100) : 0;
                                     return `<div class="text-center">
                                         <div class="text-xs text-gray-600">${t}</div>
-                                        <div class="font-bold">${fmt(data.views[i][j])}</div>
-                                        ${j > 0 ? `<div class="text-xs text-green-600">+${fmt(inc)}</div>` : ''}
+                                        <div class="text-sm font-bold">${fmt(data.views[i][j])}</div>
+                                        ${j > 0 ? `<div class="text-xs text-green-600">+${fmt(inc)}</div>` : ""}
                                         <div class="text-xs font-bold text-purple-600">${r.toFixed(1)}%</div>
                                     </div>`;
-                                }).join('')}
+                                }).join("")}
                             </div>
                         `}
                     </div>
                 `;
             });
 
-            html += '</div>';
-            document.getElementById('songs').innerHTML = html;
-            document.getElementById('avgRate').textContent = (totalRate / 12).toFixed(1) + '%';
+            document.getElementById("songs").innerHTML = html;
+            document.getElementById("avgRate").textContent = (totalRate / SONGS.length).toFixed(1) + "%";
         }
 
         function toggleAdmin() {
             if (isAdmin) {
                 isAdmin = false;
-                document.getElementById('adminBtn').textContent = '🔐 관리자';
-                document.getElementById('saveBtn').classList.add('hidden');
+                document.getElementById("adminBtn").textContent = "🔐 관리";
+                document.getElementById("saveBtn").classList.add("hidden");
                 render();
             } else {
-                document.getElementById('modal').classList.remove('hidden');
-                document.getElementById('pwd').value = '';
-                document.getElementById('error').classList.add('hidden');
+                document.getElementById("modal").classList.remove("hidden");
+                document.getElementById("pwd").value = "";
+                document.getElementById("error").classList.add("hidden");
             }
         }
 
         function login() {
-            if (document.getElementById('pwd').value === '@minho0728') {
+            if (document.getElementById("pwd").value === "admin2024") {
                 isAdmin = true;
-                document.getElementById('adminBtn').textContent = '🚪 로그아웃';
-                document.getElementById('saveBtn').classList.remove('hidden');
+                document.getElementById("adminBtn").textContent = "🚪 로그아웃";
+                document.getElementById("saveBtn").classList.remove("hidden");
                 closeModal();
                 render();
             } else {
-                document.getElementById('error').textContent = '비밀번호가 틀립니다';
-                document.getElementById('error').classList.remove('hidden');
+                document.getElementById("error").textContent = "비밀번호가 틀립니다";
+                document.getElementById("error").classList.remove("hidden");
             }
         }
 
         function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
+            document.getElementById("modal").classList.add("hidden");
         }
 
         function saveData() {
-            data.lastUpdate = new Date().toLocaleString('ko-KR');
-            db.ref('tracker').set(data).then(() => alert('저장 완료!'));
+            data.lastUpdate = new Date().toLocaleString("ko-KR");
+            db.ref("tracker").set(data).then(() => alert("저장 완료!"));
         }
 
         function copyLink() {
-            navigator.clipboard.writeText(window.location.href.split('?')[0]);
-            document.getElementById('copyText').textContent = '복사됨!';
-            setTimeout(() => document.getElementById('copyText').textContent = '링크 복사', 2000);
+            navigator.clipboard.writeText(window.location.href.split("?")[0]);
+            document.getElementById("copyText").textContent = "완료!";
+            setTimeout(() => document.getElementById("copyText").textContent = "복사", 2000);
         }
 
-        document.getElementById('pwd').addEventListener('keypress', e => {
-            if (e.key === 'Enter') login();
+        document.getElementById("pwd").addEventListener("keypress", e => {
+            if (e.key === "Enter") login();
         });
 
         render();
     </script>
 </body>
 </html>
-
-
 
