@@ -121,6 +121,9 @@
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
 
+      // 초기 렌더링
+        renderSongs();
+
         // 데이터 로드
         db.ref('viewTracker').on('value', (snapshot) => {
             const data = snapshot.val();
@@ -131,8 +134,9 @@
                 if (data.lastUpdate) {
                     document.getElementById('lastUpdate').textContent = '마지막 업데이트: ' + data.lastUpdate;
                 }
-                renderSongs();
+              
             }
+          renderSongs();
         });
 
         function showLogin() {
