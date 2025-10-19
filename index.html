@@ -119,6 +119,7 @@
 
         // Firebase 초기화
         window.addEventListener('load', function() {
+            renderSongs();
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
 
@@ -360,3 +361,4 @@ function getCurrentViews(songIndex) {
     </script>
 </body>
 </html>
+
