@@ -208,14 +208,24 @@
 
         function updateGoal(songIndex, value) {
             goals[songIndex] = parseInt(value) || 0;
+            renderSongs();
         }
 
         function updateView(songIndex, timeIndex, value) {
             viewData[songIndex][timeIndex] = parseInt(value) || 0;
+            renderSongs();
         }
 
         function updateTimeLabel(index, value) {
             timeLabels[index] = value;
+            renderSongs();
+        }
+
+        function getViewIncrease(songIndex, timeIndex) {
+            if (timeIndex === 0) return 0;
+            const current = viewData[songIndex][timeIndex] || 0;
+            const previous = viewData[songIndex][timeIndex - 1] || 0;
+            return current - previous;
         }
 
         function renderSongs() {
@@ -236,7 +246,7 @@
                                         <span class="text-sm text-gray-600">목표:</span>
                                         ${isAdmin ? `
                                             <input type="number" value="${goals[songIndex]}" 
-                                                onchange="updateGoal(${songIndex}, this.value); renderSongs();"
+                                                onchange="updateGoal(${songIndex}, this.value)"
                                                 class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
                                         ` : `
                                             <span class="font-semibold text-purple-600">${formatNumber(goals[songIndex])}</span>
@@ -268,7 +278,7 @@
                                             ${timeLabels.map((label, i) => `
                                                 <th class="py-2 px-2">
                                                     <input type="text" value="${label}" 
-                                                        onchange="updateTimeLabel(${i}, this.value); renderSongs();"
+                                                        onchange="updateTimeLabel(${i}, this.value)"
                                                         class="w-full px-2 py-1 border border-gray-300 rounded text-sm text-center">
                                                 </th>
                                             `).join('')}
@@ -280,10 +290,23 @@
                                             ${viewData[songIndex].map((view, i) => `
                                                 <td class="py-2 px-2">
                                                     <input type="number" value="${view}" 
-                                                        onchange="updateView(${songIndex}, ${i}, this.value); renderSongs();"
+                                                        onchange="updateView(${songIndex}, ${i}, this.value)"
                                                         class="w-full px-2 py-1 border border-gray-300 rounded text-sm text-center">
                                                 </td>
                                             `).join('')}
+                                        </tr>
+                                        <tr class="border-t border-gray-100">
+                                            <td class="py-2 px-2 text-sm text-gray-600">증가량</td>
+                                            ${viewData[songIndex].map((view, i) => {
+                                                const increase = getViewIncrease(songIndex, i);
+                                                const increaseColor = increase > 0 ? 'text-green-600' : 'text-gray-400';
+                                                return `
+                                                <td class="py-2 px-2 text-center">
+                                                    <span class="text-xs font-semibold ${increaseColor}">
+                                                        ${i > 0 ? '+' + formatNumber(increase) : '-'}
+                                                    </span>
+                                                </td>
+                                            `}).join('')}
                                         </tr>
                                     </tbody>
                                 </table>
@@ -291,12 +314,16 @@
                         ` : `
                             <div class="bg-white rounded-lg p-4 border border-gray-200">
                                 <div class="grid grid-cols-5 gap-2">
-                                    ${timeLabels.map((label, i) => `
+                                    ${timeLabels.map((label, i) => {
+                                        const increase = getViewIncrease(songIndex, i);
+                                        const increaseColor = increase > 0 ? 'text-green-600' : 'text-gray-400';
+                                        return `
                                         <div class="text-center">
                                             <div class="text-xs text-gray-600 mb-1">${label}</div>
                                             <div class="text-sm font-semibold text-gray-800">${formatNumber(viewData[songIndex][i])}</div>
+                                            ${i > 0 ? `<div class="text-xs ${increaseColor} mt-1">+${formatNumber(increase)}</div>` : ''}
                                         </div>
-                                    `).join('')}
+                                    `}).join('')}
                                 </div>
                             </div>
                         `}
