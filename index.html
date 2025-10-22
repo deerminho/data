@@ -3,461 +3,868 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>유튜브 조회수 트래커</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title> 랜덤 플레이 타임 </title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", Arial, sans-serif;
             background: linear-gradient(135deg, #0d7377 0%, #14FFEC 50%, #00CEC9 100%);
+            min-height: 100vh;
+            padding: 10px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 206, 201, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(20, 255, 236, 0.2) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0;
+            animation: float-up 6s ease-in infinite;
+        }
+        
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #00CEC9 0%, #14FFEC 100%);
+            border-radius: 20px 20px 0 0;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 206, 201, 0.4);
+        }
+        
+        .header::before {
+            content: '⚡';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: -50px;
+            right: -30px;
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .admin-lock {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+            font-size: 20px;
+        }
+        
+        .admin-lock:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            color: white;
+            font-weight: 900;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h2 {
+            font-size: 32px;
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .live-badge {
+            display: inline-block;
+            background: #00CEC9;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            animation: blink 1.5s ease-in-out infinite;
+            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.5);
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .mission-banner {
+            background: linear-gradient(90deg, #00CEC9 0%, #14FFEC 50%, #0dcaf0 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            animation: gradient-shift 3s ease infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .video-container {
+            background: #000;
+            position: relative;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-info {
+            background: linear-gradient(135deg, #2d3436 0%, #1e272e 100%);
+            padding: 25px;
+            color: white;
+        }
+        
+        .now-playing {
+            font-size: 14px;
+            color: #00CEC9;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .video-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .timer-box {
+            background: rgba(0, 206, 201, 0.2);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 2px solid #00CEC9;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .timer-number {
+            color: #00CEC9;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        
+        .next-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #00CEC9 0%, #14FFEC 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(0, 206, 201, 0.4);
+        }
+        
+        .next-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 206, 201, 0.6);
+        }
+        
+        .stats-section {
+            background: white;
+            padding: 30px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 206, 201, 0.2);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #00CEC9 0%, #14FFEC 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 18px 15px;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: left;
+        }
+        
+        th:nth-child(2), th:nth-child(3), th:nth-child(4) {
+            text-align: center;
+        }
+        
+        tbody tr {
+            border-bottom: 2px solid #f1f3f5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        tbody tr:hover {
+            background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+            transform: translateX(5px);
+        }
+        
+        tbody tr.playing {
+            background: linear-gradient(90deg, #d1f8f6 0%, #a8e6e3 100%);
+            border-left: 5px solid #00CEC9;
+        }
+        
+        td {
+            padding: 18px 15px;
+            font-size: 15px;
+        }
+        
+        td:nth-child(2), td:nth-child(3), td:nth-child(4) {
+            text-align: center;
+        }
+        
+        .song-title {
+            font-weight: 700;
+            color: #2d3436;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .play-icon {
+            color: #00CEC9;
+            font-size: 18px;
+        }
+        
+        .previous-views {
+            color: #636e72;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .current-views {
+            color: #00CEC9;
+            font-weight: 800;
+            font-size: 16px;
+        }
+        
+        .increase-views {
+            font-weight: 900;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        .increase-views.positive {
+            color: #ff6b6b;
+        }
+        .increase-views.negative {
+            color: #0984e3;
+        }
+        .increase-views.zero {
+            color: #636e72;
+        }
+        .arrow-icon {
+            font-size: 20px;
+            font-weight: 900;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .modal-header h2 {
+            font-size: 24px;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: #00CEC9;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #00CEC9 0%, #14FFEC 100%);
+            color: white;
+        }
+        
+        .modal-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 206, 201, 0.4);
+        }
+        
+        .modal-btn-secondary {
+            background: #636e72;
+            color: white;
+        }
+        
+        .modal-btn-secondary:hover {
+            background: #2d3436;
+        }
+        
+        .error-msg {
+            color: #ff4757;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .admin-panel {
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .admin-table {
+            margin: 20px 0;
+        }
+        
+        .admin-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .admin-song-title {
+            flex: 1;
+            font-weight: 700;
+            color: #2d3436;
+            font-size: 14px;
+        }
+        
+        .admin-input {
+            width: 150px;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .admin-input:focus {
+            outline: none;
+            border-color: #00CEC9;
+        }
+        
+        .footer {
+            background: white;
+            padding: 25px;
+            text-align: center;
+            color: #636e72;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .footer-heart {
+            color: #00CEC9;
+            animation: heartbeat 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(1.2); }
+            20%, 40% { transform: scale(1); }
+        }
+        
+        .firebase-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 206, 201, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 32px; }
+            .header h2 { font-size: 24px; }
+            .video-title { font-size: 20px; }
+            .admin-song-title { font-size: 12px; }
+            .admin-input { width: 100px; }
         }
     </style>
 </head>
-<body class="p-3 sm:p-6 min-h-screen">
-    
-    <div class="max-w-6xl mx-auto">
-        <div class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 mb-4">
-            <div class="flex items-center justify-between mb-5 gap-3">
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-black text-teal-700"> 장민호 ANALOG Vol.1 </h1>
-                    <p id="lastUpdate" class="text-sm text-gray-500 mt-1"></p>
-                </div>
-                <div class="flex gap-2 text-sm sm:text-base">
-                    <button onclick="toggleV15Sync()" id="syncBtn" class="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 font-bold shadow-md transition">
-                        🔗 V15연동
-                    </button>
-                    <button onclick="copyLink()" class="bg-teal-600 text-white px-4 py-2.5 rounded-lg hover:bg-teal-700 font-bold shadow-md transition">
-                        📋 <span id="copyText">복사</span>
-                    </button>
-                    <button onclick="toggleAdmin()" id="adminBtn" class="bg-cyan-600 text-white px-4 py-2.5 rounded-lg hover:bg-cyan-700 font-bold shadow-md transition">
-                        🔐 관리
-                    </button>
-                    <button onclick="saveData()" id="saveBtn" class="hidden bg-emerald-600 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-700 font-bold shadow-md transition">
-                        💾 저장
-                    </button>
-                </div>
+<body>
+    <div class="floating-hearts" id="floatingHearts"></div>
+    <div class="firebase-status" id="firebaseStatus">🔄 연결 중...</div>
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div style="font-size: 48px; margin-bottom: 10px;">🔐</div>
+                <h2>관리자 인증</h2>
+                <p style="color: #636e72; font-size: 14px;">비밀번호를 입력하세요</p>
             </div>
-
-            <div class="bg-gradient-to-r from-teal-100 to-cyan-100 rounded-xl p-4 mb-5 text-center shadow-inner">
-                <div class="text-lg font-bold text-gray-700 mb-2"> ANALOG Vol.1 트래커 </div>
-                <div class="text-sm text-gray-600 mb-3">
-                    <span id="syncStatus" class="font-bold text-gray-500">V15 연동 대기중 (버튼 클릭)</span>
-                </div>
-                <div class="flex justify-center gap-6">
-                    <div>
-                        <div class="text-xs text-gray-500">전체 평균 달성률</div>
-                        <div id="avgRate" class="text-3xl font-black text-teal-700">0.0%</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500">V13 누적</div>
-                        <div id="v13Total" class="text-2xl font-black text-cyan-700">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 전체 곡 -->
-            <div class="mb-6">
-                <h2 class="text-xl font-black text-gray-700 mb-3 flex items-center gap-2">
-                    <span class="bg-teal-600 text-white px-3 py-1 rounded-lg text-sm">전체 13곡</span>
-                    시간대별 기록
-                </h2>
-                <div id="allsongs" class="space-y-4"></div>
-            </div>
-
-            <!-- V13 집계 -->
-            <div>
-                <h2 class="text-xl font-black text-gray-700 mb-3 flex items-center gap-2">
-                    <span class="bg-cyan-600 text-white px-3 py-1 rounded-lg text-sm">V13 (8곡)</span>
-                    집계 결과 (자동 반영)
-                </h2>
-                <div id="v13summary" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            </div>
-        </div>
-
-        <div class="text-center text-white text-sm mb-4">
-            💙 Made with  by 민호특공대💙
-        </div>
-    </div>
-
-    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl p-8 max-w-sm w-full shadow-2xl">
-            <h2 class="text-2xl font-bold mb-4 text-teal-700 text-center">🔐 관리자 로그인</h2>
-            <input type="password" id="pwd" placeholder="비밀번호" class="w-full px-4 py-3 border-2 border-teal-300 rounded-lg mb-4 text-lg">
-            <div id="error" class="hidden text-red-600 text-base mb-4 font-semibold text-center"></div>
-            <div class="flex gap-3">
-                <button onclick="closeModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg text-base font-bold hover:bg-gray-100 transition">취소</button>
-                <button onclick="login()" class="flex-1 bg-teal-600 text-white px-4 py-3 rounded-lg text-base font-bold hover:bg-teal-700 transition">로그인</button>
+            <input type="password" class="modal-input" id="passwordInput" placeholder="비밀번호" onkeypress="if(event.key==='Enter') checkPassword()">
+            <p class="error-msg" id="passwordError">비밀번호가 올바르지 않습니다</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="closePasswordModal()">취소</button>
+                <button class="modal-btn modal-btn-primary" onclick="checkPassword()">확인</button>
             </div>
         </div>
     </div>
-
+    <div class="modal" id="adminModal">
+        <div class="modal-content admin-panel">
+            <div class="modal-header">
+                <h2>⚙️ 조회수 관리</h2>
+                <p style="color: #636e72; font-size: 14px;">Firebase 실시간 동기화</p>
+            </div>
+            <div class="admin-table" id="adminTable"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="closeAdminModal()">취소</button>
+                <button class="modal-btn modal-btn-primary" onclick="saveAdminData()">💾 저장</button>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="header">
+            <div class="admin-lock" onclick="showPasswordModal()">🔒</div>
+            <h1> 랜덤 플레이 타임 </h1>
+            <h2>ANALOG Vol.1</h2>
+            <div class="live-badge">🔴 LIVE 총공 진행중</div>
+        </div>
+        <div class="mission-banner">
+            🔥 목표를 향하여 으라차차차! 🔥
+        </div>
+        <div class="video-container">
+            <div class="video-wrapper">
+                <iframe id="videoFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <div class="video-info">
+                <div class="now-playing">
+                    <span>▶</span> NOW PLAYING
+                </div>
+                <div class="video-title" id="videoTitle">-</div>
+                <div class="timer-box">
+                    ⏱️ 다음 곡까지 <span class="timer-number" id="countdown">-</span>
+                </div>
+                <button class="next-btn" onclick="playNextRandom()">🔄 다음 곡 랜덤 재생</button>
+            </div>
+        </div>
+        <div class="stats-section">
+            <h3 style="margin-bottom: 20px; color: #2d3436; font-size: 24px; font-weight: 800;">
+                📈 실시간 조회수 현황
+            </h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>곡명</th>
+                            <th>이전</th>
+                            <th>현재</th>
+                            <th>증감</th>
+                        </tr>
+                    </thead>
+                    <tbody id="songTable"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="footer">
+            💙 Made with <span class="footer-heart"></span> by 민호특공대💙
+            <div style="margin-top: 10px; font-size: 15px; font-weight: 700; color: #00CEC9;">
+                ✨ 민호특공대 함께라면 무엇이든 할 수 있습니다 ✨
+            </div>
+        </div>
+    </div>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
-        const ALL_SONGS = [
-            { name: "Hankyeryeong Pass", isV13: true },
-            { name: "Lonely Love", isV13: true },
-            { name: "My Reflection in My Heart", isV13: true },
-            { name: "내 곁에 있어주 | 야외녹음실 LIVE", isV13: true },
-            { name: "I'll Give You the Love I Have Left", isV13: true },
-            { name: "Just a Friend", isV13: true },
-            { name: "That Day", isV13: true },
-            { name: "I will let go", isV13: true },
-            { name: "내 곁에 있어주 Official MV", isV13: false },
-            { name: "Stay by My Side | 1theK", isV13: false },
-            { name: "한계령 Official MV", isV13: false },
-            { name: "Hankyeryeong Pass | 1theK", isV13: false },
-            { name: "홀로된 사랑 | 트롯챔피언", isV13: false }
-        ];
-
-        let isAdmin = false;
-        let isV15Syncing = false;
-        let db;
-        let data = {
-            times: ["시간1", "시간2", "시간3", "시간4", "시간5"],
-            goals: Array(13).fill(100000),
-            views: Array(13).fill(null).map(() => [0,0,0,0,0])
-        };
-
-        firebase.initializeApp({
+        const firebaseConfig = {
             apiKey: "AIzaSyDk0r98Ag5htVKH-vVxUzG52SYNcX1G0sA",
             authDomain: "analog-vol1-mv.firebaseapp.com",
             databaseURL: "https://analog-vol1-mv-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "analog-vol1-mv",
             storageBucket: "analog-vol1-mv.firebasestorage.app",
             messagingSenderId: "40601613117",
-            appId: "1:40601613117:web:de43110328bc627df14b54"
-        });
-        db = firebase.database();
-
-        // V15 연동: 활성화된 경우에만 views 경로 실시간 감지
-        let v15Listener = null;
+            appId: "1:40601613117:web:de43110328bc627df14b54",
+            measurementId: "G-SRN2TZCE82"
+        };
+        const ADMIN_PASSWORD = "@minho0728";
         
-        function toggleV15Sync() {
-            isV15Syncing = !isV15Syncing;
-            const btn = document.getElementById("syncBtn");
-            const status = document.getElementById("syncStatus");
+        const videos = [
+         
+            { id: 'Ghg7vG3NMs4', title: 'Hankyeryeong Pass', initialViews: 0},
+            { id: 'ILppFoa3FTI', title: 'Lonely Love', initialViews: 0 },
+            { id: 'DKgiBUaZXr4', title: 'My Reflection in My Heart', initialViews: 0 },
+            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', initialViews: 0 },
+            { id: '1LlNcwtxsgg', title: 'I\'ll Give You the Love I Have Left', initialViews: 0},
+            { id: 'rsW-F7IRGmU', title: 'Just a Friend', initialViews: 0 },
+            { id: 'H8ZnFKkc7ps', title: 'That Day', initialViews: 0 },
+            { id: 'q78AVE07wdI', title: 'I will let go', initialViews: 0 },
+            { id: '0JeQF_nrSmU', title: '내 곁에 있어주 (Stay by My Side) Official MV', initialViews:0 },
+            { id: '33xZoSnV5t0', title: 'Stay by My Side(내 곁에 있어주) | 1theK', initialViews: 0 },
+            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', initialViews:0 },
+            { id: 'C7Y9D4hV3QU', title: 'Hankyeryeong Pass(한계령) | 1theK', initialViews: 0 },
+            { id: 'iQ4CCJgJKXM', title: '홀로된 사랑 | 트롯챔피언 | EP.72', initialViews: 0},
+            { id: '-zYhlQn6yVI', title: '내 이름 아시죠 | 사랑의콜센타', initialViews: 0},
+            { id: 'ZOPl8hBKd5c', title: ' 하이뮨의 NEW CF 촬영 현장', initialViews: 0 },
+            { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', initialViews: 0},
+            { id: '6lq_G6l4xRs', title: 'Lonely Love(홀로된 사랑) | 1theK', initialViews: 0 }
             
-            if (isV15Syncing) {
-                btn.textContent = "🔗 V15연동중";
-                btn.classList.remove("bg-blue-600", "hover:bg-blue-700");
-                btn.classList.add("bg-green-600", "hover:bg-green-700");
-                status.textContent = "✅ V15 실시간 동기화 활성화";
-                status.className = "font-bold text-green-600";
-                
-                // V15 리스너 시작
-                v15Listener = db.ref("views").on("value", snap => {
-                    const v15Views = snap.val();
-                    if (v15Views) {
-                        ALL_SONGS.forEach((song, i) => {
-                            if (v15Views[i] !== undefined && v15Views[i] > 0) {
-                                data.views[i][4] = v15Views[i];
-                            }
-                        });
-                        render();
-                    }
-                });
-            } else {
-                btn.textContent = "🔗 V15연동";
-                btn.classList.remove("bg-green-600", "hover:bg-green-700");
-                btn.classList.add("bg-blue-600", "hover:bg-blue-700");
-                status.textContent = "V15 연동 대기중 (버튼 클릭)";
-                status.className = "font-bold text-gray-500";
-                
-                // V15 리스너 중지
-                if (v15Listener) {
-                    db.ref("views").off("value", v15Listener);
-                }
-            }
-        }
+        ];
+        let db;
+        let currentIndex = 0;
+        let isPlaying = false;
+        let countdown = 0;
+        let timerInterval;
+        let viewsData = {};
+        let previousViews = {};
 
-        // tracker3 데이터 로드
-        db.ref("tracker3").on("value", snap => {
-            const val = snap.val();
-            if (val) {
-                if (val.times) data.times = val.times;
-                if (val.goals) data.goals = val.goals;
-                if (val.views) {
-                    // tracker3의 시간1~4만 가져오고, 시간5는 V15 값 유지
-                    val.views.forEach((viewArray, i) => {
-                        if (viewArray) {
-                            for (let j = 0; j < 4; j++) {
-                                data.views[i][j] = viewArray[j];
-                            }
+        function initializeFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                
+                videos.forEach((video, index) => {
+                    db.ref('views/' + index).once('value', (snapshot) => {
+                        if (!snapshot.exists()) {
+                            db.ref('views/' + index).set(video.initialViews);
                         }
                     });
-                }
-                if (val.lastUpdate) {
-                    document.getElementById("lastUpdate").textContent = "업데이트: " + val.lastUpdate;
-                }
-                render();
-            }
-        });
-
-        function fmt(n) {
-            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-
-        function getLatest(views) {
-            for (let i = views.length - 1; i >= 0; i--) {
-                if (views[i] > 0) return views[i];
-            }
-            return 0;
-        }
-
-        function getRate(views, goal) {
-            const latest = getLatest(views);
-            return goal > 0 ? Math.min((latest / goal) * 100, 100) : 0;
-        }
-
-        function renderAllSongs() {
-            let html = "";
-            let totalRate = 0;
-
-            ALL_SONGS.forEach((song, i) => {
-                const rate = getRate(data.views[i], data.goals[i]);
-                const latest = getLatest(data.views[i]);
-                totalRate += rate;
-
-                html += `
-                    <div class="border-2 border-teal-200 rounded-xl p-4 bg-gradient-to-br from-white to-teal-50 shadow-lg">
-                        <div class="flex justify-between items-center mb-3">
-                            <div class="flex-1 flex items-center gap-2">
-                                <h3 class="font-black text-xl text-gray-800">${song.name}</h3>
-                                ${song.isV13 ? '<span class="bg-cyan-600 text-white text-xs px-2 py-0.5 rounded font-bold">V13</span>' : ''}
-                            </div>
-                            <div class="flex gap-4 text-base ml-3">
-                                <div class="text-center">
-                                    <div class="text-xs text-gray-500">목표</div>
-                                    ${isAdmin ? 
-                                        `<input type="number" value="${data.goals[i]}" onchange="updateGoal(${i}, this.value)" 
-                                        class="w-24 px-2 py-1 border-2 border-teal-400 rounded-lg bg-teal-50 font-black text-base text-center">` 
-                                        : `<div class="font-black text-lg text-teal-700">${fmt(data.goals[i])}</div>`}
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-xs text-gray-500">현재</div>
-                                    <div class="font-black text-lg text-cyan-600">${fmt(latest)}</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-xs text-gray-500">달성</div>
-                                    <div class="font-black text-lg text-emerald-600">${rate.toFixed(1)}%</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3 mb-3 shadow-inner">
-                            <div class="bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 h-3 rounded-full shadow-md transition-all duration-500" style="width:${rate}%"></div>
-                        </div>
-                        ${isAdmin ? `
-                            <div class="bg-white rounded-lg p-3 overflow-x-auto shadow-inner border border-teal-100">
-                                <table class="w-full text-sm">
-                                    <tr class="border-b-2 border-teal-200">
-                                        <th class="p-2 text-left font-bold">시간</th>
-                                        ${data.times.map((t,j) => `<th class="p-2"><input type="text" value="${t}" 
-                                            onchange="updateTime(${j}, this.value)" 
-                                            class="w-full px-2 py-1 border-2 border-teal-300 rounded text-center font-bold"></th>`).join("")}
-                                    </tr>
-                                    <tr class="border-b border-teal-100">
-                                        <td class="p-2 font-bold text-gray-700">조회수</td>
-                                        ${data.views[i].map((v,j) => {
-                                            const isV15Linked = j === 4 && isV15Syncing;
-                                            return `<td class="p-2 ${isV15Linked ? 'bg-cyan-50' : ''}">
-                                                ${isV15Linked ? 
-                                                    `<div class="text-center font-black text-cyan-700">${fmt(v)}<br><span class="text-xs">V15연동</span></div>` :
-                                                    `<input type="number" value="${v}" 
-                                                        onchange="updateView(${i}, ${j}, this.value)" 
-                                                        class="w-full px-2 py-1 border-2 border-gray-300 rounded text-center font-semibold">`
-                                                }
-                                            </td>`;
-                                        }).join("")}
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2 font-bold text-gray-700">증가</td>
-                                        ${data.views[i].map((v,j) => {
-                                            const inc = j > 0 ? v - data.views[i][j-1] : 0;
-                                            return `<td class="p-2 text-center">
-                                                <div class="font-black text-base ${inc > 0 ? "text-emerald-600" : "text-gray-300"}">
-                                                    ${j > 0 ? "+" + fmt(inc) : "-"}
-                                                </div>
-                                            </td>`;
-                                        }).join("")}
-                                    </tr>
-                                </table>
-                            </div>
-                        ` : `
-                            <div class="grid grid-cols-5 gap-2 bg-white rounded-lg p-3 shadow-inner border border-teal-100">
-                                ${data.times.map((t,j) => {
-                                    const inc = j > 0 ? data.views[i][j] - data.views[i][j-1] : 0;
-                                    const r = data.goals[i] > 0 ? Math.min((data.views[i][j] / data.goals[i]) * 100, 100) : 0;
-                                    const isV15Linked = j === 4 && isV15Syncing;
-                                    return `<div class="text-center p-2 rounded-lg ${j > 0 && inc > 0 ? "bg-emerald-50" : ""} ${isV15Linked ? "border-2 border-cyan-400" : ""}">
-                                        <div class="text-sm font-bold text-gray-600 mb-1">${t}${isV15Linked ? ' 🔗' : ''}</div>
-                                        <div class="text-xl font-black text-gray-800 mb-1">${fmt(data.views[i][j])}</div>
-                                        ${j > 0 ? `<div class="text-lg font-black text-emerald-600 mb-1">+${fmt(inc)}</div>` : `<div class="h-7"></div>`}
-                                        <div class="text-base font-black text-teal-600">${r.toFixed(1)}%</div>
-                                    </div>`;
-                                }).join("")}
-                            </div>
-                        `}
-                    </div>
-                `;
-            });
-
-            document.getElementById("allsongs").innerHTML = html;
-            return totalRate;
-        }
-
-        function renderV13Summary() {
-            let html = "";
-            let v13TotalViews = 0;
-            let v13TotalGoals = 0;
-            let v13Count = 0;
-
-            ALL_SONGS.forEach((song, i) => {
-                if (!song.isV13) return;
-                
-                const latest = getLatest(data.views[i]);
-                const goal = data.goals[i];
-                const rate = getRate(data.views[i], goal);
-                
-                v13TotalViews += latest;
-                v13TotalGoals += goal;
-                v13Count++;
-
-                const firstView = data.views[i][0];
-                const increase = latest - firstView;
-
-                html += `
-                    <div class="border-2 border-cyan-200 rounded-xl p-4 bg-gradient-to-br from-white to-cyan-50 shadow-lg">
-                        <h4 class="font-black text-base text-gray-800 mb-3">${song.name}</h4>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div>
-                                <div class="text-xs text-gray-500 mb-1">시작</div>
-                                <div class="text-lg font-black text-gray-600">${fmt(firstView)}</div>
-                            </div>
-                            <div class="bg-emerald-50 rounded-lg p-2">
-                                <div class="text-xs text-gray-500 mb-1">증가</div>
-                                <div class="text-lg font-black text-emerald-600">+${fmt(increase)}</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-gray-500 mb-1">현재</div>
-                                <div class="text-lg font-black text-cyan-600">${fmt(latest)}</div>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="flex justify-between text-xs text-gray-600 mb-1">
-                                <span>목표: ${fmt(goal)}</span>
-                                <span class="font-bold text-cyan-600">${rate.toFixed(1)}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-gradient-to-r from-teal-500 to-cyan-500 h-2 rounded-full transition-all duration-500" style="width:${rate}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            const v13AvgRate = v13TotalGoals > 0 ? (v13TotalViews / v13TotalGoals) * 100 : 0;
-            html = `
-                <div class="col-span-1 md:col-span-2 border-2 border-cyan-300 rounded-xl p-4 bg-gradient-to-r from-teal-100 to-cyan-100 shadow-lg mb-4">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h4 class="font-black text-xl text-teal-800">V13 전체 통계</h4>
-                            <div class="text-sm text-gray-600 mt-1">${v13Count}곡 집계</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-gray-600">누적 조회수</div>
-                            <div class="text-2xl font-black text-teal-700">${fmt(v13TotalViews)}</div>
-                            <div class="text-lg font-bold text-cyan-600 mt-1">${v13AvgRate.toFixed(1)}% 달성</div>
-                        </div>
-                    </div>
-                </div>
-            ` + html;
-
-            document.getElementById("v13summary").innerHTML = html;
-            document.getElementById("v13Total").textContent = fmt(v13TotalViews);
-        }
-
-        function render() {
-            const totalRate = renderAllSongs();
-            renderV13Summary();
-            document.getElementById("avgRate").textContent = (totalRate / ALL_SONGS.length).toFixed(1) + "%";
-        }
-
-        function updateTime(idx, val) {
-            data.times[idx] = val;
-            render();
-        }
-
-        function updateGoal(idx, val) {
-            data.goals[idx] = +val;
-            render();
-        }
-
-        function updateView(songIdx, timeIdx, val) {
-            data.views[songIdx][timeIdx] = +val;
-            render();
-        }
-
-        function toggleAdmin() {
-            if (isAdmin) {
-                isAdmin = false;
-                document.getElementById("adminBtn").textContent = "🔐 관리";
-                document.getElementById("saveBtn").classList.add("hidden");
-                render();
-            } else {
-                document.getElementById("modal").classList.remove("hidden");
-                document.getElementById("pwd").value = "";
-                document.getElementById("error").classList.add("hidden");
-            }
-        }
-
-        function login() {
-            if (document.getElementById("pwd").value === "@minho0728") {
-                isAdmin = true;
-                document.getElementById("adminBtn").textContent = "🚪 로그아웃";
-                document.getElementById("saveBtn").classList.remove("hidden");
-                closeModal();
-                render();
-            } else {
-                document.getElementById("error").textContent = "비밀번호가 틀립니다";
-                document.getElementById("error").classList.remove("hidden");
-            }
-        }
-
-        function closeModal() {
-            document.getElementById("modal").classList.add("hidden");
-        }
-
-        function saveData() {
-            const saveData = {
-                times: data.times,
-                goals: data.goals,
-                views: data.views.map(viewArray => viewArray.slice(0, 4)), // 시간1~4만 저장
-                lastUpdate: new Date().toLocaleString("ko-KR")
-            };
-            db.ref("tracker3").set(saveData).then(() => {
-                if (isV15Syncing) {
-                    // V15 연동 활성화 시에만 views에 저장
-                    data.views.forEach((viewArray, i) => {
-                        db.ref("views/" + i).set(viewArray[4]);
+                });
+                db.ref('views').on('value', (snapshot) => {
+                    const newData = snapshot.val() || {};
+                    // 이전 값 저장
+                    Object.keys(viewsData).forEach(key => {
+                        if (viewsData[key] !== newData[key]) {
+                            previousViews[key] = viewsData[key];
+                        }
                     });
-                    alert("✅ 저장 완료! V15에도 반영됩니다.");
+                    viewsData = newData;
+                    updateUI();
+                });
+                document.getElementById('firebaseStatus').textContent = '✅ Firebase 연결됨';
+                setTimeout(() => {
+                    document.getElementById('firebaseStatus').style.display = 'none';
+                }, 3000);
+                
+                console.log('✅ Firebase 연결 성공');
+            } catch (error) {
+                console.error('Firebase 초기화 실패:', error);
+                document.getElementById('firebaseStatus').textContent = '⚠️ Firebase 오류';
+                document.getElementById('firebaseStatus').style.background = 'rgba(255, 107, 107, 0.9)';
+                
+                videos.forEach((video, index) => {
+                    viewsData[index] = video.initialViews;
+                    previousViews[index] = video.initialViews;
+                });
+                updateUI();
+            }
+        }
+        function updateUI() {
+            let tableHTML = '';
+            videos.forEach((video, index) => {
+                const currentViews = viewsData[index] || video.initialViews;
+                const prevViews = previousViews[index] || video.initialViews;
+                const change = currentViews - prevViews;
+                const isCurrentPlaying = index === currentIndex && isPlaying;
+                
+                let arrow = '';
+                let changeClass = '';
+                if (change > 0) {
+                    arrow = '↑';
+                    changeClass = 'positive';
+                } else if (change < 0) {
+                    arrow = '↓';
+                    changeClass = 'negative';
                 } else {
-                    alert("✅ 저장 완료!");
+                    arrow = '→';
+                    changeClass = 'zero';
                 }
+                tableHTML += `
+                    <tr class="${isCurrentPlaying ? 'playing' : ''}" onclick="playVideo(${index})">
+                        <td>
+                            <div class="song-title">
+                                ${isCurrentPlaying ? '<span class="play-icon">▶</span>' : ''}
+                                ${video.title}
+                            </div>
+                        </td>
+                        <td><span class="previous-views">${prevViews.toLocaleString()}</span></td>
+                        <td><span class="current-views">${currentViews.toLocaleString()}</span></td>
+                        <td>
+                            <span class="increase-views ${changeClass}">
+                                <span class="arrow-icon">${arrow}</span>
+                                ${change > 0 ? '+' : ''}${change.toLocaleString()}
+                            </span>
+                        </td>
+                    </tr>
+                `;
             });
+            document.getElementById('songTable').innerHTML = tableHTML;
         }
-
-        function copyLink() {
-            navigator.clipboard.writeText(window.location.href.split("?")[0]);
-            document.getElementById("copyText").textContent = "완료!";
-            setTimeout(() => document.getElementById("copyText").textContent = "복사", 2000);
+        function playVideo(index) {
+            currentIndex = index;
+            isPlaying = true;
+            
+            document.getElementById('videoFrame').src = 
+                `https://www.youtube.com/embed/${videos[index].id}?autoplay=1&controls=1`;
+            document.getElementById('videoTitle').textContent = videos[index].title;
+            const randomDuration = Math.floor(Math.random() * 11) + 95;
+            startTimer(randomDuration);
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        document.getElementById("pwd").addEventListener("keypress", e => {
-            if (e.key === "Enter") login();
-        });
-
-        render();
+        function playNextRandom() {
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * videos.length);
+            } while (nextIndex === currentIndex && videos.length > 1);
+            playVideo(nextIndex);
+        }
+        function startTimer(duration) {
+            countdown = duration;
+            updateTimer();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                countdown--;
+                updateTimer();
+                if (countdown <= 0) {
+                    clearInterval(timerInterval);
+                    playNextRandom();
+                }
+            }, 1000);
+        }
+        function updateTimer() {
+            document.getElementById('countdown').textContent = countdown + '초';
+        }
+        function showPasswordModal() {
+            document.getElementById('passwordModal').classList.add('show');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordError').style.display = 'none';
+            document.getElementById('passwordInput').focus();
+        }
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('show');
+        }
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === ADMIN_PASSWORD) {
+                closePasswordModal();
+                showAdminModal();
+            } else {
+                document.getElementById('passwordError').style.display = 'block';
+            }
+        }
+        function showAdminModal() {
+            let adminHTML = '';
+            videos.forEach((video, index) => {
+                const currentViews = viewsData[index] || video.initialViews;
+                adminHTML += `
+                    <div class="admin-row">
+                        <div class="admin-song-title">${video.title}</div>
+                        <input type="number" class="admin-input" id="admin-${index}" value="${currentViews}">
+                    </div>
+                `;
+            });
+            document.getElementById('adminTable').innerHTML = adminHTML;
+            document.getElementById('adminModal').classList.add('show');
+        }
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.remove('show');
+        }
+        function saveAdminData() {
+            if (!db) {
+                alert('❌ Firebase 연결이 필요합니다. 페이지를 새로고침하세요.');
+                return;
+            }
+            videos.forEach((video, index) => {
+                const input = document.getElementById('admin-' + index);
+                const value = parseInt(input.value) || 0;
+                db.ref('views/' + index).set(value);
+            });
+            closeAdminModal();
+            alert('✅ 저장 완료! 모든 사용자에게 실시간 반영됩니다.');
+        }
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            const hearts = ['💙', '💚', '🩵', '💎', '✨'];
+            
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 2 + 's';
+                heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                container.appendChild(heart);
+                setTimeout(() => heart.remove(), 7000);
+            }, 800);
+        }
+        window.onload = function() {
+            initializeFirebase();
+            createFloatingHearts();
+            setTimeout(() => {
+                const randomStart = Math.floor(Math.random() * videos.length);
+                playVideo(randomStart);
+            }, 500);
+        };
     </script>
 </body>
 </html>
-
