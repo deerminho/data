@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title> Always! </title>
+    <title>참여 없이는 기록도 없다</title>
     <style>
         * {
             margin: 0;
@@ -15,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Noto Sans KR", Arial, sans-serif;
             background: linear-gradient(135deg, #E8F8F7 0%, #B8F5E9 50%, #A8E6CE 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 15px;
             position: relative;
             overflow-x: hidden;
         }
@@ -41,8 +41,40 @@
             50% { opacity: 1; transform: translateY(-20px); }
         }
         
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0;
+            animation: float-up 8s ease-in infinite;
+            filter: drop-shadow(0 2px 4px rgba(0, 206, 201, 0.2));
+        }
+        
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+            10% { opacity: 0.9; }
+            90% { opacity: 0.9; }
+            100% {
+                transform: translateY(-100px) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+        
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             position: relative;
             z-index: 2;
@@ -61,21 +93,21 @@
             backdrop-filter: blur(10px);
         }
         
-        /* 클로버 - 행운의 하루 */
-    .header::before {
-    content: '🍀';
-    position: absolute;
-    font-size: 100px;
-    opacity: 0.08;
-    top: -15px;
-    left: 30px;
-    animation: twinkle 3s ease-in-out infinite;
-     }
+        /* 헤더 장식 요소 */
+        .header::before {
+            content: '✨';
+            position: absolute;
+            font-size: 120px;
+            opacity: 0.08;
+            top: -20px;
+            left: 30px;
+            animation: twinkle 3s ease-in-out infinite;
+        }
         
         .header::after {
             content: '🎵';
             position: absolute;
-            font-size: 90px;
+            font-size: 100px;
             opacity: 0.08;
             bottom: -10px;
             right: 30px;
@@ -93,24 +125,76 @@
         }
         
         .header h1 {
-            font-size: 42px;
+            font-size: 48px;
             background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 50%, #00CEC9 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 900;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             position: relative;
             z-index: 1;
             letter-spacing: -1px;
+            text-shadow: 0 2px 20px rgba(0, 206, 201, 0.2);
         }
         
-        .header p {
-            font-size: 18px;
-            color: #3ab8af;
+        .header h2 {
+            font-size: 28px;
+            color: #2d3436;
             font-weight: 600;
+            margin-bottom: 20px;
             position: relative;
             z-index: 1;
+            letter-spacing: -0.5px;
+        }
+        
+        .live-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            animation: pulse-badge 2s ease-in-out infinite;
+            box-shadow: 
+                0 4px 15px rgba(0, 206, 201, 0.3),
+                0 2px 8px rgba(0, 206, 201, 0.2);
+            letter-spacing: 0.5px;
+        }
+        
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(0, 206, 201, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0, 206, 201, 0.4); }
+        }
+        
+        .mission-banner {
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 50%, #A8E6CE 100%);
+            padding: 25px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 20px rgba(0, 206, 201, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .mission-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shine 3s ease-in-out infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            50%, 100% { left: 100%; }
         }
         
         .video-container {
@@ -131,7 +215,7 @@
         .video-wrapper.shorts-mode {
             padding-bottom: 0;
             height: auto;
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
         }
         
@@ -139,14 +223,17 @@
             content: '';
             display: block;
             padding-bottom: 177.78%;
+            max-height: 80vh;
         }
         
+        .video-wrapper iframe,
         .video-wrapper #player {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            border: none;
         }
         
         .video-info {
@@ -171,7 +258,7 @@
 
         .shorts-indicator {
             display: inline-block;
-            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
             color: white;
             padding: 4px 12px;
             border-radius: 15px;
@@ -179,11 +266,16 @@
             font-weight: 800;
             letter-spacing: 0.5px;
             margin-left: 8px;
-            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+            animation: pulse-shorts 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-shorts {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .video-title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 800;
             margin-bottom: 20px;
             color: #2d3436;
@@ -192,7 +284,7 @@
 
         /* 볼륨 조절 바 스타일 */
         .volume-control {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .volume-wrapper {
@@ -207,32 +299,29 @@
 
         .volume-icon {
             font-size: 20px;
+            min-width: 24px;
         }
 
         #volumeSlider {
             flex: 1;
             height: 6px;
             border-radius: 10px;
+            background: #dfe6e9;
             outline: none;
+            -webkit-appearance: none;
             appearance: none;
             cursor: pointer;
-            background: linear-gradient(to right, #00CEC9 0%, #00CEC9 50%, #dfe6e9 50%, #dfe6e9 100%);
         }
 
         #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
             appearance: none;
             width: 18px;
             height: 18px;
             border-radius: 50%;
             background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 206, 201, 0.4);
-            transition: all 0.2s ease;
-        }
-
-        #volumeSlider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 3px 10px rgba(0, 206, 201, 0.6);
+            box-shadow: 0 2px 8px rgba(0, 206, 201, 0.3);
         }
 
         #volumeSlider::-moz-range-thumb {
@@ -242,10 +331,10 @@
             background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
             cursor: pointer;
             border: none;
-            box-shadow: 0 2px 6px rgba(0, 206, 201, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 206, 201, 0.3);
         }
 
-        .volume-display {
+        #volumeDisplay {
             font-size: 14px;
             font-weight: 700;
             color: #00CEC9;
@@ -255,11 +344,12 @@
         
         .timer-box {
             background: linear-gradient(135deg, rgba(0, 206, 201, 0.08) 0%, rgba(168, 230, 206, 0.08) 100%);
-            padding: 12px 20px;
+            padding: 15px 25px;
             border-radius: 20px;
             border: 2px solid rgba(0, 206, 201, 0.2);
             text-align: center;
-            font-size: 15px;
+            margin-bottom: 20px;
+            font-size: 16px;
             color: #2d3436;
             font-weight: 600;
         }
@@ -267,8 +357,36 @@
         .timer-number {
             color: #00CEC9;
             font-weight: 800;
-            font-size: 18px;
-            margin-left: 5px;
+            font-size: 24px;
+            margin-left: 8px;
+        }
+        
+        .next-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 20px rgba(0, 206, 201, 0.3),
+                0 2px 8px rgba(0, 206, 201, 0.2);
+            letter-spacing: 0.5px;
+        }
+        
+        .next-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 30px rgba(0, 206, 201, 0.4),
+                0 4px 12px rgba(0, 206, 201, 0.3);
+        }
+        
+        .next-btn:active {
+            transform: translateY(-1px);
         }
         
         .stats-section {
@@ -285,15 +403,15 @@
             font-size: 26px;
             font-weight: 800;
             color: #2d3436;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             text-align: center;
             letter-spacing: -0.5px;
         }
         
-        .playlist-container {
+        .grid-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             max-width: 900px;
             margin: 0 auto;
         }
@@ -301,7 +419,7 @@
         .song-card {
             background: white;
             border-radius: 16px;
-            padding: 16px 22px;
+            padding: 18px 24px;
             box-shadow: 
                 0 2px 12px rgba(0, 206, 201, 0.08),
                 0 1px 4px rgba(0, 0, 0, 0.04);
@@ -322,37 +440,33 @@
             text-align: center;
         }
 
-        .song-card.shorts-card .song-number {
-            color: #FFB3D1;
-        }
-
         .song-card.playing .song-number {
             color: #00CEC9;
         }
 
-        .song-card.shorts-playing .song-number {
-            color: #FF6B9D;
+        .song-card.shorts-card.playing .song-number {
+            color: #FF6B6B;
         }
 
         .play-icon-small {
-            width: 40px;
-            height: 40px;
-            min-width: 40px;
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
             background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 15px;
+            font-size: 16px;
             padding-left: 3px;
             box-shadow: 0 4px 12px rgba(0, 206, 201, 0.25);
             transition: all 0.3s ease;
         }
 
         .song-card.shorts-card .play-icon-small {
-            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
-            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.25);
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.25);
         }
 
         .song-title-grid {
@@ -364,7 +478,7 @@
         }
 
         .shorts-badge {
-            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
             color: white;
             padding: 6px 14px;
             border-radius: 20px;
@@ -372,7 +486,7 @@
             font-weight: 800;
             letter-spacing: 0.5px;
             white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
         }
         
         .song-card:hover {
@@ -388,8 +502,12 @@
             box-shadow: 0 6px 16px rgba(0, 206, 201, 0.35);
         }
 
+        .song-card.shorts-card:hover {
+            border-color: rgba(255, 107, 107, 0.2);
+        }
+
         .song-card.shorts-card:hover .play-icon-small {
-            box-shadow: 0 6px 16px rgba(255, 107, 157, 0.35);
+            box-shadow: 0 6px 16px rgba(255, 107, 107, 0.35);
         }
         
         .song-card.playing {
@@ -400,21 +518,12 @@
                 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
-        .song-card.shorts-playing {
-            border-color: #FF6B9D;
-            background: linear-gradient(135deg, rgba(255, 107, 157, 0.05) 0%, rgba(255, 133, 166, 0.05) 100%);
+        .song-card.shorts-card.playing {
+            border-color: #FF6B6B;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(255, 135, 135, 0.05) 100%);
             box-shadow: 
-                0 8px 24px rgba(255, 107, 157, 0.2),
+                0 8px 24px rgba(255, 107, 107, 0.2),
                 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .song-card.shorts-playing .song-number {
-            color: #FF6B9D;
-        }
-
-        .song-card.shorts-playing .play-icon-small {
-            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
-            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.35);
         }
         
         .song-card.playing .play-icon-small {
@@ -424,6 +533,34 @@
         @keyframes pulse-play {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.15); }
+        }
+        
+        .firebase-status {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 
+                0 6px 20px rgba(0, 206, 201, 0.3),
+                0 3px 10px rgba(0, 0, 0, 0.1);
+            animation: slide-in 0.5s ease;
+        }
+        
+        @keyframes slide-in {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
         
         /* 스크롤바 스타일링 */
@@ -459,25 +596,47 @@
             }
 
             .header::before {
-                font-size: 60px;
+                font-size: 70px;
                 left: 10px;
+                top: -10px;
             }
 
             .header::after {
-                font-size: 50px;
+                font-size: 60px;
                 right: 10px;
+                bottom: -5px;
             }
 
             .header h1 {
                 font-size: 28px;
+                margin-bottom: 8px;
+                letter-spacing: -0.5px;
             }
 
-            .header p {
-                font-size: 15px;
+            .header h2 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            .live-badge {
+                padding: 8px 18px;
+                font-size: 12px;
+                border-radius: 20px;
+            }
+
+            .mission-banner {
+                padding: 18px 15px;
+                font-size: 16px;
+                letter-spacing: 0.3px;
             }
 
             .video-wrapper.shorts-mode {
                 max-width: 100%;
+            }
+            
+            .video-wrapper.shorts-mode::before {
+                padding-bottom: 177.78%;
+                max-height: none;
             }
 
             .video-info {
@@ -486,6 +645,7 @@
 
             .video-title {
                 font-size: 18px;
+                margin-bottom: 15px;
             }
 
             .now-playing {
@@ -498,25 +658,31 @@
             }
 
             .volume-wrapper {
-                padding: 10px 15px;
+                padding: 10px 16px;
             }
 
             .volume-icon {
                 font-size: 18px;
             }
 
-            .volume-display {
-                font-size: 12px;
+            #volumeDisplay {
+                font-size: 13px;
                 min-width: 40px;
             }
 
             .timer-box {
-                padding: 10px 18px;
-                font-size: 13px;
+                padding: 12px 20px;
+                font-size: 14px;
+                margin-bottom: 15px;
             }
 
             .timer-number {
-                font-size: 16px;
+                font-size: 18px;
+            }
+
+            .next-btn {
+                padding: 14px;
+                font-size: 15px;
             }
 
             .stats-section {
@@ -529,12 +695,12 @@
                 margin-bottom: 20px;
             }
 
-            .playlist-container {
-                gap: 8px;
+            .grid-container {
+                gap: 10px;
             }
 
             .song-card {
-                padding: 12px 16px;
+                padding: 14px 18px;
                 gap: 12px;
             }
 
@@ -544,14 +710,14 @@
             }
 
             .play-icon-small {
-                width: 36px;
-                height: 36px;
-                min-width: 36px;
-                font-size: 13px;
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                font-size: 14px;
             }
 
             .song-title-grid {
-                font-size: 13px;
+                font-size: 14px;
             }
 
             .shorts-badge {
@@ -565,29 +731,70 @@
 
             .song-card:active {
                 transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+
+            .next-btn:hover {
+                transform: none;
+            }
+
+            .next-btn:active {
+                transform: scale(0.98);
+            }
+
+            .firebase-status {
+                top: 15px;
+                right: 15px;
+                font-size: 13px;
+                padding: 10px 20px;
+            }
+
+            .heart {
+                font-size: 18px;
             }
         }
 
-        /* ============================================ */
-        /* 🖥️ PC 최적화 (1024px 이상)                  */
-        /* ============================================ */
-        @media screen and (min-width: 1024px) {
-            .container {
-                max-width: 1000px;
+        @media screen and (min-width: 768px) and (max-width: 1023px) {
+            .header {
+                padding: 35px 25px;
+            }
+
+            .header h1 {
+                font-size: 38px;
+            }
+
+            .header h2 {
+                font-size: 24px;
+            }
+
+            .mission-banner {
+                padding: 22px 20px;
+                font-size: 18px;
             }
 
             .video-wrapper.shorts-mode {
-                max-width: 550px;
+                max-width: 450px;
+            }
+
+            .stats-section {
+                padding: 35px 25px;
+            }
+
+            .section-title {
+                font-size: 24px;
             }
 
             .song-card {
-                padding: 18px 24px;
+                padding: 16px 22px;
             }
         }
 
-        /* ============================================ */
-        /* 🎯 터치 디바이스 최적화                        */
-        /* ============================================ */
+        @media screen and (min-width: 1440px) {
+            .video-wrapper.shorts-mode {
+                max-width: 650px;
+            }
+        }
+
         @media (hover: none) and (pointer: coarse) {
             .song-card {
                 -webkit-tap-highlight-color: transparent;
@@ -605,14 +812,68 @@
                     0 2px 12px rgba(0, 206, 201, 0.08),
                     0 1px 4px rgba(0, 0, 0, 0.04);
             }
+
+            .next-btn:hover {
+                transform: none;
+            }
+
+            .next-btn:active {
+                transform: scale(0.98);
+            }
+        }
+
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header h2 {
+                font-size: 16px;
+            }
+
+            .mission-banner {
+                padding: 15px;
+                font-size: 14px;
+            }
+
+            .stats-section {
+                padding: 20px 15px;
+            }
+
+            .section-title {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            .grid-container {
+                gap: 8px;
+            }
+
+            .song-card {
+                padding: 12px 16px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="floating-hearts" id="floatingHearts"></div>
+    <div class="firebase-status" id="firebaseStatus">Firebase 연결 중...</div>
+
     <div class="container">
         <div class="header">
-            <h1> Always! </h1>
-            <p>오늘도, 내일도, 영원히 우리 방식으로✨</p>
+            <h1>🦌 유튜브 랜덤 플레이 타임</h1>
+            <h2>참여 없이는 기록도 없다</h2>
+            <div>
+                <span class="live-badge">🔴 LIVE</span>
+            </div>
+        </div>
+
+        <div class="mission-banner">
+            🎯 조회수 up 프로젝트 🎯
         </div>
 
         <div class="video-container">
@@ -631,38 +892,66 @@
                     <div class="volume-wrapper">
                         <span class="volume-icon">🔊</span>
                         <input type="range" id="volumeSlider" min="0" max="100" value="50">
-                        <span class="volume-display" id="volumeDisplay">50%</span>
+                        <span id="volumeDisplay">50%</span>
                     </div>
                 </div>
 
                 <div class="timer-box" id="timerBox">
-                    <span id="timerText">다음곡까지<span class="timer-number" id="countdown">00:00</span></span>
+                    <span id="timerText">다음 곡까지: <span class="timer-number" id="countdown">로딩 중...</span></span>
                 </div>
             </div>
         </div>
 
         <div class="stats-section">
-            <div class="section-title">🎼 재생목록 (총 9곡)</div>
-            <div class="playlist-container" id="songGrid"></div>
+            <div class="grid-container" id="songGrid"></div>
         </div>
     </div>
 
     <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-   <script>
+    <script>
+        // ========================================
+        // 🔥 Firebase 설정
+        // ========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBv9j0c_n6iGC_Yc6k-1T3KM5aR-UQzq_M",
+            authDomain: "haimyon-7fdeb.firebaseapp.com",
+            databaseURL: "https://haimyon-7fdeb-default-rtdb.firebaseio.com",
+            projectId: "haimyon-7fdeb",
+            storageBucket: "haimyon-7fdeb.firebasestorage.app",
+            messagingSenderId: "799629481012",
+            appId: "1:799629481012:web:5fcadbbf29ee86ad56f1ed",
+            measurementId: "G-QBKVXQ3ES8"
+        };
+
         const videos = [
             { id: 'uV8KpDCkhds', title: '뭘 하면 좋을 지 댓글로 추천해 주세요', isShort: true },
             { id: 'mWRsIldtV1k', title: '채널 비하인드', isShort: true },
             { id: '0q9tgaWDLAk', title: '장민호가 평양냉면을 먹는 이유', isShort: true },
+            { id: 'yluKcIVKAss', title: '[모집티저] 국보급 얼굴 MC 장민호, 가을타며 기다리는 단 한사람은?!', isShort: true },
             { id: '15X0nd1_-kI', title: '발소리👞 쾌감 찢었다 홀로된사랑', isShort: true },
-            { id: 'v_3hazNandw', title: '홀로된 사랑 (Lonely Love) 안무 버전', isShort: false },
-            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', isShort: false },
+            { id: 'v_3hazNandw', title: '홀로된 사랑 (Lonely Love)안무 버전', isShort: false },
             { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요 Official MV', isShort: false },
-            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', isShort: false  },
-            { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', isShort: false }
+            { id: 'n47GSwm7MuI', title: '장민호 유튜브 시작 EP.00', isShort: false },
+            { id: 'Ghg7vG3NMs4', title: 'Hankyeryeong Pass', isShort: false },
+            { id: 'ILppFoa3FTI', title: 'Lonely Love', isShort: false },
+            { id: 'DKgiBUaZXr4', title: 'My Reflection in My Heart', isShort: false },
+            { id: 'a7hUuTsNIRY', title: 'Stay by My Side(내 곁에 있어주)', isShort: false },
+            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', isShort: false },
+            { id: '1LlNcwtxsgg', title: 'I\'ll Give You the Love I Have Left', isShort: false },
+            { id: 'rsW-F7IRGmU', title: 'Just a Friend', isShort: false },
+            { id: 'H8ZnFKkc7ps', title: 'That Day', isShort: false },
+            { id: 'q78AVE07wdI', title: 'I will let go', isShort: false },
+            { id: '0JeQF_nrSmU', title: '내 곁에 있어주 (Stay by My Side) Official MV', isShort: false },
+            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', initialViews: 65623, isShort: false },
+            { id: '-zYhlQn6yVI', title: '내 이름 아시죠 | 사랑의콜센타', initialViews: 8833996, isShort: false },
+            { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', initialViews: 0, isShort: false }
         ];
 
+        let db;
         let player;
         let currentIndex = 0;
         let isPlaying = false;
@@ -670,83 +959,69 @@
         let timerInterval;
         let isCurrentShort = false;
 
-        // YouTube IFrame API 준비
+        // ========================================
+        // 🎬 YouTube IFrame API 초기화
+        // ========================================
         function onYouTubeIframeAPIReady() {
-            // 초기 플레이어 생성 (비어있음)
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: '',
-                playerVars: {
-                    autoplay: 1,
-                    controls: 1,
-                    rel: 0,
-                    modestbranding: 1
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
+            console.log('YouTube IFrame API 로드됨');
         }
 
-        function onPlayerReady(event) {
-            // 저장된 볼륨 불러오기
-            const savedVolume = localStorage.getItem('playlistVolume') || 50;
-            player.setVolume(savedVolume);
-            document.getElementById('volumeSlider').value = savedVolume;
-            document.getElementById('volumeDisplay').textContent = savedVolume + '%';
-            updateVolumeSliderBackground(savedVolume);
+        // ========================================
+        // ⏰ 시간대별 자동 재생 설정
+        // ========================================
+        function getTimeBasedDuration() {
+            const hour = new Date().getHours();
+            let min, max;
 
-            // 볼륨 슬라이더 이벤트
-            const volumeSlider = document.getElementById('volumeSlider');
-            volumeSlider.addEventListener('input', function() {
-                const volume = this.value;
-                if (player && player.setVolume) {
-                    player.setVolume(volume);
-                }
-                document.getElementById('volumeDisplay').textContent = volume + '%';
-                localStorage.setItem('playlistVolume', volume);
-                updateVolumeSliderBackground(volume);
-            });
-
-            // 페이지 로드 후 노래 그리드 생성 및 랜덤 재생
-            createSongGrid();
-            const randomStart = Math.floor(Math.random() * videos.length);
-            playVideo(randomStart);
-        }
-
-        function onPlayerStateChange(event) {
-            // 영상이 끝났을 때
-            if (event.data == YT.PlayerState.ENDED) {
-                playNextRandom();
-            }
-        }
-
-        // 볼륨 슬라이더 배경색 업데이트
-        function updateVolumeSliderBackground(value) {
-            const slider = document.getElementById('volumeSlider');
-            const percentage = value;
-            slider.style.background = `linear-gradient(to right, #00CEC9 0%, #00CEC9 ${percentage}%, #dfe6e9 ${percentage}%, #dfe6e9 100%)`;
-        }
-
-        function getRandomDuration(isShort) {
-            if (isShort) {
-                return Math.floor(Math.random() * (13 - 8 + 1)) + 8;
+            if (hour >= 6 && hour < 12) {
+                min = 65;
+                max = 95;
+            } else if (hour >= 12 && hour < 18) {
+                min = 65;
+                max = 95;
             } else {
-                return Math.floor(Math.random() * (90 - 65 + 1)) + 65;
+                min = 65;
+                max = 100;
+            }
+
+            const range = max - min + 1;
+            return Math.floor(Math.random() * range) + min;
+        }
+
+        function initializeFirebase() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                
+                videos.forEach((video, index) => {
+                    db.ref('views/' + index).once('value', (snapshot) => {
+                        if (!snapshot.exists()) {
+                            db.ref('views/' + index).set(video.initialViews || 0);
+                        }
+                    });
+                });
+
+                document.getElementById('firebaseStatus').textContent = '✅ Firebase 연결됨';
+                setTimeout(() => {
+                    document.getElementById('firebaseStatus').style.display = 'none';
+                }, 3000);
+                
+                console.log('✅ Firebase 연결 성공');
+            } catch (error) {
+                console.error('Firebase 초기화 실패:', error);
+                document.getElementById('firebaseStatus').textContent = '⚠️ Firebase 오류';
+                document.getElementById('firebaseStatus').style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%)';
             }
         }
 
         function createSongGrid() {
             const gridHTML = videos.map((video, index) => {
-                const isCurrentPlaying = index === currentIndex && isPlaying;
-                const playingClass = isCurrentPlaying ? (video.isShort ? 'playing shorts-playing' : 'playing') : '';
-                const shortsCardClass = video.isShort ? 'shorts-card' : '';
+                const shortsClass = video.isShort ? 'shorts-card' : '';
+                const playingClass = index === currentIndex && isPlaying ? 'playing' : '';
                 const shortsBadge = video.isShort ? '<span class="shorts-badge">SHORTS</span>' : '';
                 
                 return `
-                    <div class="song-card ${shortsCardClass} ${playingClass}" onclick="playVideo(${index})" id="card-${index}">
+                    <div class="song-card ${shortsClass} ${playingClass}" onclick="playVideo(${index})" id="card-${index}">
                         <span class="song-number">${String(index + 1).padStart(2, '0')}</span>
                         <div class="play-icon-small">▶</div>
                         <div class="song-title-grid">${video.title}</div>
@@ -760,12 +1035,10 @@
 
         function updatePlayingCard() {
             document.querySelectorAll('.song-card').forEach((card, index) => {
-                card.classList.remove('playing', 'shorts-playing');
                 if (index === currentIndex && isPlaying) {
                     card.classList.add('playing');
-                    if (videos[index].isShort) {
-                        card.classList.add('shorts-playing');
-                    }
+                } else {
+                    card.classList.remove('playing');
                 }
             });
         }
@@ -780,6 +1053,7 @@
             const videoWrapper = document.getElementById('videoWrapper');
             const shortsIndicator = document.getElementById('shortsIndicator');
             const timerBox = document.getElementById('timerBox');
+            const timerText = document.getElementById('timerText');
 
             if (isCurrentShort) {
                 videoWrapper.classList.add('shorts-mode');
@@ -789,28 +1063,54 @@
                 videoWrapper.classList.remove('shorts-mode');
                 shortsIndicator.style.display = 'none';
                 timerBox.style.display = 'block';
-            }
-            
-            // YouTube IFrame API로 영상 로드
-            if (player && player.loadVideoById) {
-                player.loadVideoById(video.id);
+                const duration = getTimeBasedDuration();
+                timerText.innerHTML = '다음 곡까지: <span class="timer-number" id="countdown">' + duration + '초</span>';
             }
             
             document.getElementById('videoTitle').textContent = video.title;
 
+            // 일반 영상일 경우 타이머 시작
+            let videoDuration;
+            if (!isCurrentShort) {
+                videoDuration = getTimeBasedDuration();
+                startTimer(videoDuration);
+            }
+
+            // YouTube Player 생성 또는 교체
+            if (player) {
+                player.loadVideoById(video.id);
+            } else {
+                player = new YT.Player('player', {
+                    videoId: video.id,
+                    playerVars: {
+                        autoplay: 1,
+                        controls: 1,
+                        rel: 0
+                    },
+                    events: {
+                        'onReady': onPlayerReady
+                    }
+                });
+            }
+
             if (isCurrentShort) {
                 if (timerInterval) clearInterval(timerInterval);
-                const duration = getRandomDuration(true);
                 setTimeout(() => {
                     playNextRandom();
-                }, duration * 1000);
-            } else {
-                const duration = getRandomDuration(false);
-                startTimer(duration);
+                }, 35000);
             }
 
             updatePlayingCard();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function onPlayerReady(event) {
+            // 저장된 볼륨 불러오기
+            const savedVolume = localStorage.getItem('playerVolume') || 50;
+            player.setVolume(savedVolume);
+            document.getElementById('volumeSlider').value = savedVolume;
+            document.getElementById('volumeDisplay').textContent = savedVolume + '%';
+            updateVolumeSliderBackground(savedVolume);
         }
 
         function playNextRandom() {
@@ -841,11 +1141,64 @@
         function updateTimer() {
             const countdownEl = document.getElementById('countdown');
             if (countdownEl) {
-                const minutes = Math.floor(countdown / 60);
-                const seconds = countdown % 60;
-                countdownEl.textContent = ` ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                countdownEl.textContent = countdown + '초';
             }
         }
+
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            const hearts = ['💙', '💚', '🩵', '💎', '✨', '🌿', '🍃'];
+            
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 2 + 's';
+                heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                container.appendChild(heart);
+
+                setTimeout(() => heart.remove(), 8000);
+            }, 1000);
+        }
+
+        // ========================================
+        // 🔊 볼륨 조절 기능
+        // ========================================
+        function updateVolumeSliderBackground(value) {
+            const slider = document.getElementById('volumeSlider');
+            const percentage = value;
+            slider.style.background = `linear-gradient(to right, #00CEC9 0%, #00CEC9 ${percentage}%, #dfe6e9 ${percentage}%, #dfe6e9 100%)`;
+        }
+
+        // ========================================
+        // 🚀 페이지 로드 시 즉시 실행
+        // ========================================
+        window.addEventListener('load', function() {
+            initializeFirebase();
+            createSongGrid();
+            createFloatingHearts();
+            
+            // 볼륨 슬라이더 이벤트
+            const volumeSlider = document.getElementById('volumeSlider');
+            volumeSlider.addEventListener('input', function() {
+                const volume = this.value;
+                if (player && player.setVolume) {
+                    player.setVolume(volume);
+                }
+                document.getElementById('volumeDisplay').textContent = volume + '%';
+                localStorage.setItem('playerVolume', volume);
+                updateVolumeSliderBackground(volume);
+            });
+
+            // 초기 슬라이더 배경 설정
+            const savedVolume = localStorage.getItem('playerVolume') || 50;
+            updateVolumeSliderBackground(savedVolume);
+            
+            // 즉시 자동 재생 시작
+            const randomStart = Math.floor(Math.random() * videos.length);
+            playVideo(randomStart);
+        });
 
         window.addEventListener('beforeunload', function() {
             if (timerInterval) clearInterval(timerInterval);
@@ -853,4 +1206,3 @@
     </script>
 </body>
 </html>
-
