@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 랜덤 플레이 타임 </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title> 연습장 </title>
     <style>
         * {
             margin: 0;
@@ -12,14 +12,15 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", Arial, sans-serif;
-            background: linear-gradient(135deg, #0d7377 0%, #14FFEC 50%, #00CEC9 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Noto Sans KR", Arial, sans-serif;
+            background: linear-gradient(135deg, #E8F8F7 0%, #B8F5E9 50%, #A8E6CE 100%);
             min-height: 100vh;
-            padding: 10px;
+            padding: 20px;
             position: relative;
             overflow-x: hidden;
         }
         
+        /* 배경 패턴 효과 */
         body::before {
             content: '';
             position: fixed;
@@ -27,161 +28,95 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 206, 201, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(20, 255, 236, 0.2) 0%, transparent 50%);
-            animation: pulse 4s ease-in-out infinite;
+            background-image: 
+                radial-gradient(circle at 15% 25%, rgba(0, 206, 201, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(168, 230, 206, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(184, 245, 233, 0.05) 0%, transparent 50%);
             pointer-events: none;
+            animation: float-pattern 20s ease-in-out infinite;
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-        
-        .floating-hearts {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .heart {
-            position: absolute;
-            font-size: 20px;
-            opacity: 0;
-            animation: float-up 6s ease-in infinite;
-        }
-        
-        @keyframes float-up {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.8; }
-            100% {
-                transform: translateY(-100px) rotate(360deg);
-                opacity: 0;
-            }
+        @keyframes float-pattern {
+            0%, 100% { opacity: 0.6; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-20px); }
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             position: relative;
             z-index: 2;
         }
         
         .header {
-            background: linear-gradient(135deg, #00CEC9 0%, #14FFEC 100%);
-            border-radius: 20px 20px 0 0;
-            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 254, 253, 0.95) 100%);
+            border-radius: 30px 30px 0 0;
+            padding: 40px 30px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 206, 201, 0.4);
+            box-shadow: 
+                0 10px 40px rgba(0, 206, 201, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
         }
         
+        /* 헤더 장식 요소 */
         .header::before {
-            content: '⚡';
+            content: '💤';
             position: absolute;
-            font-size: 200px;
-            opacity: 0.1;
-            top: -50px;
-            right: -30px;
-            animation: rotate 10s linear infinite;
+            font-size: 100px;
+            opacity: 0.08;
+            top: -15px;
+            left: 30px;
+            animation: twinkle 3s ease-in-out infinite;
         }
         
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .admin-lock {
+        .header::after {
+            content: '🎵';
             position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 45px;
-            height: 45px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 10;
-            font-size: 20px;
+            font-size: 90px;
+            opacity: 0.08;
+            bottom: -10px;
+            right: 30px;
+            animation: bounce-soft 4s ease-in-out infinite;
         }
         
-        .admin-lock:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(1.1);
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.08; transform: scale(1); }
+            50% { opacity: 0.15; transform: scale(1.1); }
+        }
+        
+        @keyframes bounce-soft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
         .header h1 {
-            font-size: 48px;
-            color: white;
+            font-size: 42px;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 50%, #00CEC9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 900;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
             margin-bottom: 10px;
             position: relative;
             z-index: 1;
+            letter-spacing: -1px;
         }
         
-        .header h2 {
-            font-size: 32px;
-            color: #fff;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px;
+        .header p {
+            font-size: 18px;
+            color: #3ab8af;
+            font-weight: 600;
             position: relative;
             z-index: 1;
         }
         
-        .live-badge {
-            display: inline-block;
-            background: #00CEC9;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 700;
-            animation: blink 1.5s ease-in-out infinite;
-            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.5);
-        }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        .mission-banner {
-            background: linear-gradient(90deg, #00CEC9 0%, #14FFEC 50%, #0dcaf0 100%);
-            padding: 20px;
-            text-align: center;
-            color: white;
-            font-size: 20px;
-            font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            animation: gradient-shift 3s ease infinite;
-            background-size: 200% 200%;
-        }
-        
-        @keyframes gradient-shift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
         .video-container {
-            background: #000;
+            background: white;
             position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
         
         .video-wrapper {
@@ -189,6 +124,21 @@
             padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
+            background: #000;
+        }
+
+        /* 쇼츠 전용 비디오 래퍼 - PC 최적화 */
+        .video-wrapper.shorts-mode {
+            padding-bottom: 0;
+            height: auto;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .video-wrapper.shorts-mode::before {
+            content: '';
+            display: block;
+            padding-bottom: 177.78%;
         }
         
         .video-wrapper iframe {
@@ -201,576 +151,518 @@
         }
         
         .video-info {
-            background: linear-gradient(135deg, #2d3436 0%, #1e272e 100%);
-            padding: 25px;
-            color: white;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 254, 253, 0.98) 100%);
+            padding: 30px;
+            color: #2d3436;
+            backdrop-filter: blur(10px);
+            border-top: 2px solid rgba(0, 206, 201, 0.1);
         }
         
         .now-playing {
-            font-size: 14px;
+            font-size: 13px;
             color: #00CEC9;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .shorts-indicator {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
         }
         
         .video-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
-            margin-bottom: 15px;
-            color: white;
+            margin-bottom: 20px;
+            color: #2d3436;
+            line-height: 1.3;
         }
         
         .timer-box {
-            background: rgba(0, 206, 201, 0.2);
-            padding: 10px 20px;
-            border-radius: 15px;
-            border: 2px solid #00CEC9;
+            background: linear-gradient(135deg, rgba(0, 206, 201, 0.08) 0%, rgba(168, 230, 206, 0.08) 100%);
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 206, 201, 0.2);
             text-align: center;
-            margin-bottom: 15px;
+            font-size: 15px;
+            color: #2d3436;
+            font-weight: 600;
         }
         
         .timer-number {
             color: #00CEC9;
             font-weight: 800;
-            font-size: 20px;
-        }
-        
-        .next-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #00CEC9 0%, #14FFEC 100%);
-            color: white;
-            border: none;
-            border-radius: 15px;
             font-size: 18px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 6px 20px rgba(0, 206, 201, 0.4);
-        }
-        
-        .next-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 206, 201, 0.6);
+            margin-left: 5px;
         }
         
         .stats-section {
-            background: white;
-            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 254, 253, 0.95) 100%);
+            padding: 40px 30px;
+            border-radius: 0 0 30px 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 -5px 20px rgba(0, 206, 201, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
         
-        .table-container {
-            overflow-x: auto;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 206, 201, 0.2);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        
-        thead {
-            background: linear-gradient(135deg, #00CEC9 0%, #14FFEC 100%);
-            color: white;
-        }
-        
-        th {
-            padding: 18px 15px;
-            font-weight: 700;
-            font-size: 14px;
-            text-align: left;
-        }
-        
-        th:nth-child(2), th:nth-child(3), th:nth-child(4) {
-            text-align: center;
-        }
-        
-        tbody tr {
-            border-bottom: 2px solid #f1f3f5;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        tbody tr:hover {
-            background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
-            transform: translateX(5px);
-        }
-        
-        tbody tr.playing {
-            background: linear-gradient(90deg, #d1f8f6 0%, #a8e6e3 100%);
-            border-left: 5px solid #00CEC9;
-        }
-        
-        td {
-            padding: 18px 15px;
-            font-size: 15px;
-        }
-        
-        td:nth-child(2), td:nth-child(3), td:nth-child(4) {
-            text-align: center;
-        }
-        
-        .song-title {
-            font-weight: 700;
-            color: #2d3436;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .play-icon {
-            color: #00CEC9;
-            font-size: 18px;
-        }
-        
-        .previous-views {
-            color: #636e72;
-            font-weight: 600;
-            font-size: 15px;
-        }
-        
-        .current-views {
-            color: #00CEC9;
+        .section-title {
+            font-size: 26px;
             font-weight: 800;
-            font-size: 16px;
-        }
-        
-        .increase-views {
-            font-weight: 900;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            justify-content: center;
-        }
-        .increase-views.positive {
-            color: #ff6b6b;
-        }
-        .increase-views.negative {
-            color: #0984e3;
-        }
-        .increase-views.zero {
-            color: #636e72;
-        }
-        .arrow-icon {
-            font-size: 20px;
-            font-weight: 900;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.show {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 450px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        .modal-header {
-            text-align: center;
+            color: #2d3436;
             margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: -0.5px;
         }
         
-        .modal-header h2 {
-            font-size: 24px;
-            color: #2d3436;
-            margin-bottom: 8px;
-        }
-        
-        .modal-input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        
-        .modal-input:focus {
-            outline: none;
-            border-color: #00CEC9;
-        }
-        
-        .modal-buttons {
+        .playlist-container {
             display: flex;
-            gap: 12px;
-            margin-top: 20px;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 900px;
+            margin: 0 auto;
         }
         
-        .modal-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
+        .song-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 22px;
+            box-shadow: 
+                0 2px 12px rgba(0, 206, 201, 0.08),
+                0 1px 4px rgba(0, 0, 0, 0.04);
             cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .modal-btn-primary {
-            background: linear-gradient(135deg, #00CEC9 0%, #14FFEC 100%);
-            color: white;
-        }
-        
-        .modal-btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 206, 201, 0.4);
-        }
-        
-        .modal-btn-secondary {
-            background: #636e72;
-            color: white;
-        }
-        
-        .modal-btn-secondary:hover {
-            background: #2d3436;
-        }
-        
-        .error-msg {
-            color: #ff4757;
-            font-size: 14px;
-            margin-top: 10px;
-            display: none;
-        }
-        
-        .admin-panel {
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .admin-table {
-            margin: 20px 0;
-        }
-        
-        .admin-row {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-bottom: 10px;
+            gap: 16px;
+            position: relative;
         }
-        
-        .admin-song-title {
-            flex: 1;
-            font-weight: 700;
-            color: #2d3436;
-            font-size: 14px;
-        }
-        
-        .admin-input {
-            width: 150px;
-            padding: 10px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
+
+        .song-number {
+            font-size: 16px;
+            font-weight: 800;
+            color: #b2bec3;
+            min-width: 35px;
             text-align: center;
-            font-weight: 600;
         }
-        
-        .admin-input:focus {
-            outline: none;
-            border-color: #00CEC9;
+
+        .song-card.shorts-card .song-number {
+            color: #FFB3D1;
         }
-        
-        .footer {
-            background: white;
-            padding: 25px;
-            text-align: center;
-            color: #636e72;
-            border-radius: 0 0 20px 20px;
-        }
-        
-        .footer-heart {
+
+        .song-card.playing .song-number {
             color: #00CEC9;
-            animation: heartbeat 1.5s ease-in-out infinite;
-            display: inline-block;
         }
-        
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            10%, 30% { transform: scale(1.2); }
-            20%, 40% { transform: scale(1); }
+
+        .song-card.shorts-playing .song-number {
+            color: #FF6B9D;
         }
-        
-        .firebase-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 206, 201, 0.9);
+
+        .play-icon-small {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, #00CEC9 0%, #00E0D4 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 10px 20px;
+            font-size: 15px;
+            padding-left: 3px;
+            box-shadow: 0 4px 12px rgba(0, 206, 201, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .song-card.shorts-card .play-icon-small {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.25);
+        }
+
+        .song-title-grid {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d3436;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .shorts-badge {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            color: white;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.4);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
         }
         
-        @media (max-width: 768px) {
-            .header h1 { font-size: 32px; }
-            .header h2 { font-size: 24px; }
-            .video-title { font-size: 20px; }
-            .admin-song-title { font-size: 12px; }
-            .admin-input { width: 100px; }
+        .song-card:hover {
+            transform: translateX(8px);
+            box-shadow: 
+                0 6px 20px rgba(0, 206, 201, 0.15),
+                0 3px 8px rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 206, 201, 0.2);
+        }
+
+        .song-card:hover .play-icon-small {
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(0, 206, 201, 0.35);
+        }
+
+        .song-card.shorts-card:hover .play-icon-small {
+            box-shadow: 0 6px 16px rgba(255, 107, 157, 0.35);
+        }
+        
+        .song-card.playing {
+            border-color: #00CEC9;
+            background: linear-gradient(135deg, rgba(0, 206, 201, 0.05) 0%, rgba(168, 230, 206, 0.05) 100%);
+            box-shadow: 
+                0 8px 24px rgba(0, 206, 201, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .song-card.shorts-playing {
+            border-color: #FF6B9D;
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.05) 0%, rgba(255, 133, 166, 0.05) 100%);
+            box-shadow: 
+                0 8px 24px rgba(255, 107, 157, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .song-card.shorts-playing .song-number {
+            color: #FF6B9D;
+        }
+
+        .song-card.shorts-playing .play-icon-small {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF85A6 100%);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.35);
+        }
+        
+        .song-card.playing .play-icon-small {
+            animation: pulse-play 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-play {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        
+        /* 스크롤바 스타일링 */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 206, 201, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #00CEC9 0%, #A8E6CE 100%);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #00E0D4 0%, #B8F5E9 100%);
+        }
+
+        /* ============================================ */
+        /* 📱 모바일 최적화 (0-767px)                    */
+        /* ============================================ */
+        @media screen and (max-width: 767px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 25px 20px;
+                border-radius: 20px 20px 0 0;
+            }
+
+            .header::before {
+                font-size: 60px;
+                left: 10px;
+            }
+
+            .header::after {
+                font-size: 50px;
+                right: 10px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .header p {
+                font-size: 15px;
+            }
+
+            .video-wrapper.shorts-mode {
+                max-width: 100%;
+            }
+
+            .video-info {
+                padding: 20px 15px;
+            }
+
+            .video-title {
+                font-size: 18px;
+            }
+
+            .now-playing {
+                font-size: 11px;
+            }
+
+            .shorts-indicator {
+                font-size: 10px;
+                padding: 3px 10px;
+            }
+
+            .timer-box {
+                padding: 10px 18px;
+                font-size: 13px;
+            }
+
+            .timer-number {
+                font-size: 16px;
+            }
+
+            .stats-section {
+                padding: 25px 15px;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .section-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+
+            .playlist-container {
+                gap: 8px;
+            }
+
+            .song-card {
+                padding: 12px 16px;
+                gap: 12px;
+            }
+
+            .song-number {
+                font-size: 14px;
+                min-width: 30px;
+            }
+
+            .play-icon-small {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                font-size: 13px;
+            }
+
+            .song-title-grid {
+                font-size: 13px;
+            }
+
+            .shorts-badge {
+                font-size: 10px;
+                padding: 5px 12px;
+            }
+
+            .song-card:hover {
+                transform: none;
+            }
+
+            .song-card:active {
+                transform: scale(0.98);
+            }
+        }
+
+        /* ============================================ */
+        /* 🖥️ PC 최적화 (1024px 이상)                  */
+        /* ============================================ */
+        @media screen and (min-width: 1024px) {
+            .container {
+                max-width: 1000px;
+            }
+
+            .video-wrapper.shorts-mode {
+                max-width: 550px;
+            }
+
+            .song-card {
+                padding: 18px 24px;
+            }
+        }
+
+        /* ============================================ */
+        /* 🎯 터치 디바이스 최적화                        */
+        /* ============================================ */
+        @media (hover: none) and (pointer: coarse) {
+            .song-card {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+
+            .song-card:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+
+            .song-card:hover {
+                transform: none;
+                box-shadow: 
+                    0 2px 12px rgba(0, 206, 201, 0.08),
+                    0 1px 4px rgba(0, 0, 0, 0.04);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="floating-hearts" id="floatingHearts"></div>
-    <div class="firebase-status" id="firebaseStatus">🔄 연결 중...</div>
-    <div class="modal" id="passwordModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div style="font-size: 48px; margin-bottom: 10px;">🔐</div>
-                <h2>관리자 인증</h2>
-                <p style="color: #636e72; font-size: 14px;">비밀번호를 입력하세요</p>
-            </div>
-            <input type="password" class="modal-input" id="passwordInput" placeholder="비밀번호" onkeypress="if(event.key==='Enter') checkPassword()">
-            <p class="error-msg" id="passwordError">비밀번호가 올바르지 않습니다</p>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-secondary" onclick="closePasswordModal()">취소</button>
-                <button class="modal-btn modal-btn-primary" onclick="checkPassword()">확인</button>
-            </div>
-        </div>
-    </div>
-    <div class="modal" id="adminModal">
-        <div class="modal-content admin-panel">
-            <div class="modal-header">
-                <h2>⚙️ 조회수 관리</h2>
-                <p style="color: #636e72; font-size: 14px;">Firebase 실시간 동기화</p>
-            </div>
-            <div class="admin-table" id="adminTable"></div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-secondary" onclick="closeAdminModal()">취소</button>
-                <button class="modal-btn modal-btn-primary" onclick="saveAdminData()">💾 저장</button>
-            </div>
-        </div>
-    </div>
     <div class="container">
         <div class="header">
-            <div class="admin-lock" onclick="showPasswordModal()">🔒</div>
-            <h1> 랜덤 플레이 타임 </h1>
-            <h2>ANALOG Vol.1</h2>
-            <div class="live-badge">🔴 LIVE 총공 진행중</div>
+            <h1> 연습장 </h1>
+            <p>오늘도, 내일도, 영원히 우리 방식으로✨</p>
         </div>
-        <div class="mission-banner">
-            🔥 목표를 향하여 으라차차차! 🔥
-        </div>
+
         <div class="video-container">
-            <div class="video-wrapper">
-                <iframe id="videoFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div class="video-wrapper" id="videoWrapper">
+                <iframe id="videoFrame" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
             <div class="video-info">
                 <div class="now-playing">
-                    <span>▶</span> NOW PLAYING
+                    <span>▶ NOW PLAYING</span>
+                    <span class="shorts-indicator" id="shortsIndicator" style="display: none;">SHORTS</span>
                 </div>
-                <div class="video-title" id="videoTitle">-</div>
-                <div class="timer-box">
-                    ⏱️ 다음 곡까지 <span class="timer-number" id="countdown">-</span>
+                <div class="video-title" id="videoTitle">로딩 중...</div>
+                <div class="timer-box" id="timerBox">
+                    <span id="timerText">다음곡까지<span class="timer-number" id="countdown">00:00</span></span>
                 </div>
-                <button class="next-btn" onclick="playNextRandom()">🔄 다음 곡 랜덤 재생</button>
             </div>
         </div>
+
         <div class="stats-section">
-            <h3 style="margin-bottom: 20px; color: #2d3436; font-size: 24px; font-weight: 800;">
-                📈 실시간 조회수 현황
-            </h3>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>곡명</th>
-                            <th>이전</th>
-                            <th>현재</th>
-                            <th>증감</th>
-                        </tr>
-                    </thead>
-                    <tbody id="songTable"></tbody>
-                </table>
-            </div>
-        </div>
-        <div class="footer">
-            💙 Made with <span class="footer-heart"></span> by 민호특공대💙
-            <div style="margin-top: 10px; font-size: 15px; font-weight: 700; color: #00CEC9;">
-                ✨ 민호특공대 함께라면 무엇이든 할 수 있습니다 ✨
-            </div>
+            <div class="section-title">🎼 재생목록 (총 8곡)</div>
+            <div class="playlist-container" id="songGrid"></div>
         </div>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDk0r98Ag5htVKH-vVxUzG52SYNcX1G0sA",
-            authDomain: "analog-vol1-mv.firebaseapp.com",
-            databaseURL: "https://analog-vol1-mv-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "analog-vol1-mv",
-            storageBucket: "analog-vol1-mv.firebasestorage.app",
-            messagingSenderId: "40601613117",
-            appId: "1:40601613117:web:de43110328bc627df14b54",
-            measurementId: "G-SRN2TZCE82"
-        };
-        const ADMIN_PASSWORD = "@minho0728";
-        
+
+   <script>
         const videos = [
-         
-            { id: 'Ghg7vG3NMs4', title: 'Hankyeryeong Pass', initialViews: 0},
-            { id: 'ILppFoa3FTI', title: 'Lonely Love', initialViews: 0 },
-            { id: 'DKgiBUaZXr4', title: 'My Reflection in My Heart', initialViews: 0 },
-            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', initialViews: 0 },
-            { id: '1LlNcwtxsgg', title: 'I\'ll Give You the Love I Have Left', initialViews: 0},
-            { id: 'rsW-F7IRGmU', title: 'Just a Friend', initialViews: 0 },
-            { id: 'H8ZnFKkc7ps', title: 'That Day', initialViews: 0 },
-            { id: 'q78AVE07wdI', title: 'I will let go', initialViews: 0 },
-            { id: '0JeQF_nrSmU', title: '내 곁에 있어주 (Stay by My Side) Official MV', initialViews:0 },
-            { id: '33xZoSnV5t0', title: 'Stay by My Side(내 곁에 있어주) | 1theK', initialViews: 0 },
-            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', initialViews:0 },
-            { id: 'C7Y9D4hV3QU', title: 'Hankyeryeong Pass(한계령) | 1theK', initialViews: 0 },
-            { id: 'iQ4CCJgJKXM', title: '홀로된 사랑 | 트롯챔피언 | EP.72', initialViews: 0},
-            { id: '-zYhlQn6yVI', title: '내 이름 아시죠 | 사랑의콜센타', initialViews: 0},
-            { id: 'ZOPl8hBKd5c', title: ' 하이뮨의 NEW CF 촬영 현장', initialViews: 0 },
-            { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', initialViews: 0},
-            { id: '6lq_G6l4xRs', title: 'Lonely Love(홀로된 사랑) | 1theK', initialViews: 0 }
-            
+            { id: 'uV8KpDCkhds', title: '뭘 하면 좋을 지 댓글로 추천해 주세요', isShort: true },
+            { id: 'mWRsIldtV1k', title: '채널 비하인드', isShort: true },
+            { id: '0q9tgaWDLAk', title: '장민호가 평양냉면을 먹는 이유', isShort: true },
+            { id: '15X0nd1_-kI', title: '발소리👞 쾌감 찢었다 홀로된사랑', isShort: true },
+            { id: 'v_3hazNandw', title: '홀로된 사랑 (Lonely Love) 안무 버전', isShort: false },
+            { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV', isShort: false },
+            { id: 'nczfiJBMA2U', title: '내게 남은 사랑을 드릴께요 Official MV', isShort: false },
+            { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE', isShort: false  },
+            { id: 'jXJKJc5fZnE', title: '홀로된 사랑 (Lonely Love) Official MV', isShort: false },
+            { id: 'CFiHGnWlfeY', title: '무명전설(아찔한 초대)', isShort: false}
         ];
-        let db;
+
         let currentIndex = 0;
         let isPlaying = false;
         let countdown = 0;
         let timerInterval;
-        let viewsData = {};
-        let previousViews = {};
+        let isCurrentShort = false;
 
-        function initializeFirebase() {
-            try {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                
-                videos.forEach((video, index) => {
-                    db.ref('views/' + index).once('value', (snapshot) => {
-                        if (!snapshot.exists()) {
-                            db.ref('views/' + index).set(video.initialViews);
-                        }
-                    });
-                });
-                db.ref('views').on('value', (snapshot) => {
-                    const newData = snapshot.val() || {};
-                    // 이전 값 저장
-                    Object.keys(viewsData).forEach(key => {
-                        if (viewsData[key] !== newData[key]) {
-                            previousViews[key] = viewsData[key];
-                        }
-                    });
-                    viewsData = newData;
-                    updateUI();
-                });
-                document.getElementById('firebaseStatus').textContent = '✅ Firebase 연결됨';
-                setTimeout(() => {
-                    document.getElementById('firebaseStatus').style.display = 'none';
-                }, 3000);
-                
-                console.log('✅ Firebase 연결 성공');
-            } catch (error) {
-                console.error('Firebase 초기화 실패:', error);
-                document.getElementById('firebaseStatus').textContent = '⚠️ Firebase 오류';
-                document.getElementById('firebaseStatus').style.background = 'rgba(255, 107, 107, 0.9)';
-                
-                videos.forEach((video, index) => {
-                    viewsData[index] = video.initialViews;
-                    previousViews[index] = video.initialViews;
-                });
-                updateUI();
+        function getRandomDuration(isShort) {
+            if (isShort) {
+                return Math.floor(Math.random() * (35 - 30 + 1)) + 30;
+            } else {
+                return Math.floor(Math.random() * (90 - 65 + 1)) + 65;
             }
         }
-        function updateUI() {
-            let tableHTML = '';
-            videos.forEach((video, index) => {
-                const currentViews = viewsData[index] || video.initialViews;
-                const prevViews = previousViews[index] || video.initialViews;
-                const change = currentViews - prevViews;
+
+        function createSongGrid() {
+            const gridHTML = videos.map((video, index) => {
                 const isCurrentPlaying = index === currentIndex && isPlaying;
+                const playingClass = isCurrentPlaying ? (video.isShort ? 'playing shorts-playing' : 'playing') : '';
+                const shortsCardClass = video.isShort ? 'shorts-card' : '';
+                const shortsBadge = video.isShort ? '<span class="shorts-badge">SHORTS</span>' : '';
                 
-                let arrow = '';
-                let changeClass = '';
-                if (change > 0) {
-                    arrow = '↑';
-                    changeClass = 'positive';
-                } else if (change < 0) {
-                    arrow = '↓';
-                    changeClass = 'negative';
-                } else {
-                    arrow = '→';
-                    changeClass = 'zero';
-                }
-                tableHTML += `
-                    <tr class="${isCurrentPlaying ? 'playing' : ''}" onclick="playVideo(${index})">
-                        <td>
-                            <div class="song-title">
-                                ${isCurrentPlaying ? '<span class="play-icon">▶</span>' : ''}
-                                ${video.title}
-                            </div>
-                        </td>
-                        <td><span class="previous-views">${prevViews.toLocaleString()}</span></td>
-                        <td><span class="current-views">${currentViews.toLocaleString()}</span></td>
-                        <td>
-                            <span class="increase-views ${changeClass}">
-                                <span class="arrow-icon">${arrow}</span>
-                                ${change > 0 ? '+' : ''}${change.toLocaleString()}
-                            </span>
-                        </td>
-                    </tr>
+                return `
+                    <div class="song-card ${shortsCardClass} ${playingClass}" onclick="playVideo(${index})" id="card-${index}">
+                        <span class="song-number">${String(index + 1).padStart(2, '0')}</span>
+                        <div class="play-icon-small">▶</div>
+                        <div class="song-title-grid">${video.title}</div>
+                        ${shortsBadge}
+                    </div>
                 `;
-            });
-            document.getElementById('songTable').innerHTML = tableHTML;
+            }).join('');
+
+            document.getElementById('songGrid').innerHTML = gridHTML;
         }
+
+        function updatePlayingCard() {
+            document.querySelectorAll('.song-card').forEach((card, index) => {
+                card.classList.remove('playing', 'shorts-playing');
+                if (index === currentIndex && isPlaying) {
+                    card.classList.add('playing');
+                    if (videos[index].isShort) {
+                        card.classList.add('shorts-playing');
+                    }
+                }
+            });
+        }
+
         function playVideo(index) {
             currentIndex = index;
             isPlaying = true;
             
+            const video = videos[index];
+            isCurrentShort = video.isShort;
+
+            const videoWrapper = document.getElementById('videoWrapper');
+            const shortsIndicator = document.getElementById('shortsIndicator');
+            const timerBox = document.getElementById('timerBox');
+            const countdown = document.getElementById('countdown');
+
+            if (isCurrentShort) {
+                videoWrapper.classList.add('shorts-mode');
+                shortsIndicator.style.display = 'inline-block';
+                timerBox.style.display = 'none';
+            } else {
+                videoWrapper.classList.remove('shorts-mode');
+                shortsIndicator.style.display = 'none';
+                timerBox.style.display = 'block';
+            }
+            
             document.getElementById('videoFrame').src = 
-                `https://www.youtube.com/embed/${videos[index].id}?autoplay=1&controls=1`;
-            document.getElementById('videoTitle').textContent = videos[index].title;
-            const randomDuration = Math.floor(Math.random() * 11) + 95;
-            startTimer(randomDuration);
-            updateUI();
+                `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&rel=0`;
+            document.getElementById('videoTitle').textContent = video.title;
+
+            if (isCurrentShort) {
+                if (timerInterval) clearInterval(timerInterval);
+                const duration = getRandomDuration(true);
+                setTimeout(() => {
+                    playNextRandom();
+                }, duration * 1000);
+            } else {
+                const duration = getRandomDuration(false);
+                startTimer(duration);
+            }
+
+            updatePlayingCard();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
         function playNextRandom() {
             let nextIndex;
             do {
@@ -778,93 +670,47 @@
             } while (nextIndex === currentIndex && videos.length > 1);
             playVideo(nextIndex);
         }
+
         function startTimer(duration) {
             countdown = duration;
             updateTimer();
+
             if (timerInterval) clearInterval(timerInterval);
+
             timerInterval = setInterval(() => {
                 countdown--;
                 updateTimer();
+
                 if (countdown <= 0) {
                     clearInterval(timerInterval);
                     playNextRandom();
                 }
             }, 1000);
         }
+
         function updateTimer() {
-            document.getElementById('countdown').textContent = countdown + '초';
-        }
-        function showPasswordModal() {
-            document.getElementById('passwordModal').classList.add('show');
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordError').style.display = 'none';
-            document.getElementById('passwordInput').focus();
-        }
-        function closePasswordModal() {
-            document.getElementById('passwordModal').classList.remove('show');
-        }
-        function checkPassword() {
-            const input = document.getElementById('passwordInput').value;
-            if (input === ADMIN_PASSWORD) {
-                closePasswordModal();
-                showAdminModal();
-            } else {
-                document.getElementById('passwordError').style.display = 'block';
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) {
+                const minutes = Math.floor(countdown / 60);
+                const seconds = countdown % 60;
+                countdownEl.textContent = ` ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
         }
-        function showAdminModal() {
-            let adminHTML = '';
-            videos.forEach((video, index) => {
-                const currentViews = viewsData[index] || video.initialViews;
-                adminHTML += `
-                    <div class="admin-row">
-                        <div class="admin-song-title">${video.title}</div>
-                        <input type="number" class="admin-input" id="admin-${index}" value="${currentViews}">
-                    </div>
-                `;
-            });
-            document.getElementById('adminTable').innerHTML = adminHTML;
-            document.getElementById('adminModal').classList.add('show');
-        }
-        function closeAdminModal() {
-            document.getElementById('adminModal').classList.remove('show');
-        }
-        function saveAdminData() {
-            if (!db) {
-                alert('❌ Firebase 연결이 필요합니다. 페이지를 새로고침하세요.');
-                return;
-            }
-            videos.forEach((video, index) => {
-                const input = document.getElementById('admin-' + index);
-                const value = parseInt(input.value) || 0;
-                db.ref('views/' + index).set(value);
-            });
-            closeAdminModal();
-            alert('✅ 저장 완료! 모든 사용자에게 실시간 반영됩니다.');
-        }
-        function createFloatingHearts() {
-            const container = document.getElementById('floatingHearts');
-            const hearts = ['💙', '💚', '🩵', '💎', '✨'];
-            
-            setInterval(() => {
-                const heart = document.createElement('div');
-                heart.className = 'heart';
-                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-                heart.style.left = Math.random() * 100 + '%';
-                heart.style.animationDelay = Math.random() * 2 + 's';
-                heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
-                container.appendChild(heart);
-                setTimeout(() => heart.remove(), 7000);
-            }, 800);
-        }
-        window.onload = function() {
-            initializeFirebase();
-            createFloatingHearts();
-            setTimeout(() => {
-                const randomStart = Math.floor(Math.random() * videos.length);
-                playVideo(randomStart);
-            }, 500);
-        };
+
+        window.addEventListener('load', function() {
+            createSongGrid();
+            const randomStart = Math.floor(Math.random() * videos.length);
+            playVideo(randomStart);
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (timerInterval) clearInterval(timerInterval);
+        });
     </script>
 </body>
 </html>
+
+
+
+
+
