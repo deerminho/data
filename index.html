@@ -129,29 +129,6 @@
             transition: opacity 0.2s ease;
         }
 
-        /* 영상 클릭 힌트 */
-        .video-wrapper::after {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            pointer-events: none;
-            opacity: 0;
-            animation: hint-fade 3s ease-in-out 1s;
-            z-index: 10;
-        }
-
-        @keyframes hint-fade {
-            0%, 100% { opacity: 0; }
-            20%, 80% { opacity: 1; }
-        }
-
         /* 쇼츠 전용 비디오 래퍼 - PC 최적화 */
         .video-wrapper.shorts-mode {
             padding-bottom: 0;
@@ -496,12 +473,6 @@
                 max-width: 100%;
             }
 
-            .video-wrapper::after {
-                font-size: 12px;
-                padding: 8px 16px;
-                bottom: 15px;
-            }
-
             .video-info {
                 padding: 20px 15px;
             }
@@ -683,7 +654,6 @@
         let countdown = 0;
         let timerInterval;
         let isCurrentShort = false;
-        let userInteracted = false;
 
         // YouTube IFrame API 준비
         function onYouTubeIframeAPIReady() {
@@ -696,7 +666,7 @@
                     controls: 1,
                     rel: 0,
                     modestbranding: 1,
-                    mute: 0,
+                    mute: 0,  // 음소거 해제
                     playsinline: 1
                 },
                 events: {
@@ -713,29 +683,16 @@
             document.getElementById('volumeDisplay').textContent = savedVolume + '%';
             updateVolumeSliderBackground(savedVolume);
 
-            // 영상 영역 클릭 이벤트 추가
-            const videoWrapper = document.getElementById('videoWrapper');
-            videoWrapper.addEventListener('click', function() {
-                if (!userInteracted) {
-                    userInteracted = true;
-                    player.unMute();
-                    player.setVolume(savedVolume);
-                    // 비주얼 피드백
-                    this.style.opacity = '0.95';
-                    setTimeout(() => {
-                        this.style.opacity = '1';
-                    }, 200);
-                }
-            });
+            // 즉시 음소거 해제 및 볼륨 설정
+            player.unMute();
+            player.setVolume(savedVolume);
 
             // 볼륨 슬라이더 이벤트
             const volumeSlider = document.getElementById('volumeSlider');
             volumeSlider.addEventListener('input', function() {
                 const volume = this.value;
                 if (player && player.setVolume) {
-                    if (userInteracted) {
-                        player.unMute();
-                    }
+                    player.unMute();
                     player.setVolume(volume);
                 }
                 document.getElementById('volumeDisplay').textContent = volume + '%';
@@ -827,14 +784,12 @@
             // YouTube IFrame API로 영상 로드
             if (player && player.loadVideoById) {
                 player.loadVideoById(video.id);
-                // 사용자가 이미 상호작용했으면 음소거 해제 상태 유지
-                if (userInteracted) {
-                    const currentVolume = localStorage.getItem('playlistVolume') || 50;
-                    setTimeout(() => {
-                        player.unMute();
-                        player.setVolume(currentVolume);
-                    }, 100);
-                }
+                // 음소거 해제 및 볼륨 유지
+                const currentVolume = localStorage.getItem('playlistVolume') || 50;
+                setTimeout(() => {
+                    player.unMute();
+                    player.setVolume(currentVolume);
+                }, 100);
             }
             
             document.getElementById('videoTitle').textContent = video.title;
@@ -894,6 +849,3 @@
     </script>
 </body>
 </html>
-
-
-
