@@ -1,64 +1,246 @@
-// YouTube 재생목록 자동 재생 스크립트
-(function() {
-    console.log('🎵 YouTube 자동재생 스크립트 시작...');
-    
-    const video = document.querySelector('video');
-    
-    if (!video) {
-        console.error('❌ 비디오를 찾을 수 없습니다.');
-        return;
-    }
-    
-    // 자동재생 활성화
-    const autoplayButton = document.querySelector('[aria-label*="자동재생"], [aria-label*="Autoplay"]');
-    if (autoplayButton && autoplayButton.getAttribute('aria-checked') === 'false') {
-        autoplayButton.click();
-        console.log('✅ 자동재생 활성화됨');
-    }
-    
-    // 일시정지 방지
-    video.addEventListener('pause', function() {
-        console.log('⏸️ 일시정지 감지 - 재생 재개...');
-        setTimeout(() => {
-            if (video.paused) {
-                video.play();
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube 재생목록 자동재생</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4ade80;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: #f8fafc;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        
+        .logs {
+            padding: 20px;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .log-time {
+            color: #94a3b8;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 YouTube 재생목록 자동재생</h1>
+            <div class="status">
+                <span class="status-indicator"></span>
+                <span id="statusText">자동재생 활성화됨</span>
+            </div>
+        </div>
+        
+        <div class="video-container">
+            <iframe 
+                id="youtubePlayer"
+                src="https://www.youtube.com/embed/videoseries?list=PLfuYGpnnSBu1v-uyEw7ZeaOc3WoxjIyS6&autoplay=1&loop=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-primary" onclick="reloadPlayer()">🔄 플레이어 새로고침</button>
+            <button class="btn-secondary" onclick="toggleAutoplay()">⚙️ 자동재생 토글</button>
+            <button class="btn-secondary" onclick="clearLogs()">🗑️ 로그 지우기</button>
+        </div>
+        
+        <div class="logs" id="logContainer">
+            <div class="log-entry">
+                <span class="log-time">[시작]</span>
+                <span>자동재생 모드가 활성화되었습니다.</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoplayEnabled = true;
+        
+        function addLog(message) {
+            const logContainer = document.getElementById('logContainer');
+            const time = new Date().toLocaleTimeString('ko-KR');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span>${message}</span>
+            `;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function reloadPlayer() {
+            const iframe = document.getElementById('youtubePlayer');
+            iframe.src = iframe.src;
+            addLog('플레이어를 새로고침했습니다.');
+        }
+        
+        function toggleAutoplay() {
+            autoplayEnabled = !autoplayEnabled;
+            const statusText = document.getElementById('statusText');
+            const iframe = document.getElementById('youtubePlayer');
+            
+            if (autoplayEnabled) {
+                iframe.src = iframe.src.replace('autoplay=0', 'autoplay=1');
+                statusText.textContent = '자동재생 활성화됨';
+                addLog('✅ 자동재생이 활성화되었습니다.');
+            } else {
+                iframe.src = iframe.src.replace('autoplay=1', 'autoplay=0');
+                statusText.textContent = '자동재생 비활성화됨';
+                addLog('⏸️ 자동재생이 비활성화되었습니다.');
             }
-        }, 100);
-    });
-    
-    // 영상 종료 시 다음 영상 자동 재생
-    video.addEventListener('ended', function() {
-        console.log('✅ 영상 종료 - 다음 영상 재생...');
-        const nextButton = document.querySelector('.ytp-next-button');
-        if (nextButton) {
-            nextButton.click();
         }
-    });
-    
-    // 에러 발생 시 재시도
-    video.addEventListener('error', function() {
-        console.log('⚠️ 재생 오류 발생 - 재시도 중...');
-        setTimeout(() => {
-            video.load();
-            video.play();
-        }, 1000);
-    });
-    
-    // 대기 상태에서 재생 재개
-    video.addEventListener('waiting', function() {
-        console.log('⏳ 버퍼링 중...');
-    });
-    
-    video.addEventListener('playing', function() {
-        console.log('▶️ 재생 중...');
-    });
-    
-    // 화면이 비활성화되어도 재생 유지
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden && video.paused) {
-            video.play();
+        
+        function clearLogs() {
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = `
+                <div class="log-entry">
+                    <span class="log-time">[클리어]</span>
+                    <span>로그가 지워졌습니다.</span>
+                </div>
+            `;
         }
-    });
-    
-    console.log('✅ 스크립트 설정 완료! 이제 재생목록이 멈추지 않고 계속 재생됩니다.');
-})();
+        
+        // 페이지 로드 시 자동 실행
+        window.addEventListener('load', function() {
+            addLog('페이지가 로드되었습니다.');
+            addLog('재생목록이 자동으로 재생됩니다.');
+        });
+        
+        // 에러 감지
+        window.addEventListener('error', function(e) {
+            addLog('⚠️ 오류 발생: ' + e.message);
+        });
+        
+        // 페이지 가시성 변경 감지
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                addLog('📱 탭이 백그라운드로 이동했습니다.');
+            } else {
+                addLog('👁️ 탭이 다시 활성화되었습니다.');
+            }
+        });
+    </script>
+</body>
+</html>
