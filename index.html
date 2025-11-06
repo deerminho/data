@@ -1,371 +1,393 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, TrendingUp, Plus, X, Eye, Clock } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유튜브 조회수 추적기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.5/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
 
-export default function YouTubeViewTracker() {
-  const [videos, setVideos] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [showAddVideo, setShowAddVideo] = useState(false);
-  const [newVideoTitle, setNewVideoTitle] = useState('');
-  const [viewData, setViewData] = useState({});
-  const [editingTime, setEditingTime] = useState(null);
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { Calendar, TrendingUp, Plus, X, Eye, Clock } = lucide;
 
-  useEffect(() => {
-    loadData();
-  }, []);
+        function YouTubeViewTracker() {
+            const [videos, setVideos] = useState([]);
+            const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+            const [showCalendar, setShowCalendar] = useState(false);
+            const [showAddVideo, setShowAddVideo] = useState(false);
+            const [newVideoTitle, setNewVideoTitle] = useState('');
+            const [viewData, setViewData] = useState({});
+            const [editingTime, setEditingTime] = useState(null);
 
-  const loadData = async () => {
-    try {
-      const videosResult = await window.storage.get('youtube-videos');
-      const viewsResult = await window.storage.get('youtube-views');
-      
-      if (videosResult) {
-        setVideos(JSON.parse(videosResult.value));
-      }
-      if (viewsResult) {
-        setViewData(JSON.parse(viewsResult.value));
-      }
-    } catch (error) {
-      console.log('데이터 로딩 중 오류:', error);
-    }
-  };
+            useEffect(() => {
+                loadData();
+            }, []);
 
-  const saveData = async (newVideos, newViewData) => {
-    try {
-      await window.storage.set('youtube-videos', JSON.stringify(newVideos || videos));
-      await window.storage.set('youtube-views', JSON.stringify(newViewData || viewData));
-    } catch (error) {
-      console.error('저장 실패:', error);
-    }
-  };
-
-  const addVideo = () => {
-    if (!newVideoTitle.trim()) return;
-    
-    const newVideo = {
-      id: Date.now().toString(),
-      title: newVideoTitle.trim()
-    };
-    
-    const updatedVideos = [...videos, newVideo];
-    setVideos(updatedVideos);
-    saveData(updatedVideos, viewData);
-    setNewVideoTitle('');
-    setShowAddVideo(false);
-  };
-
-  const deleteVideo = (videoId) => {
-    const updatedVideos = videos.filter(v => v.id !== videoId);
-    setVideos(updatedVideos);
-    saveData(updatedVideos, viewData);
-  };
-
-  const updateViews = (videoId, value, time) => {
-    const key = `${selectedDate}-${time}`;
-    const newViewData = { ...viewData };
-    
-    if (!newViewData[key]) {
-      newViewData[key] = {};
-    }
-    
-    newViewData[key][videoId] = parseInt(value) || 0;
-    setViewData(newViewData);
-    saveData(videos, newViewData);
-  };
-
-  const getViewIncrease = (videoId, date) => {
-    const morningKey = `${date}-morning`;
-    const eveningKey = `${date}-evening`;
-    
-    const morningViews = viewData[morningKey]?.[videoId] || 0;
-    const eveningViews = viewData[eveningKey]?.[videoId] || 0;
-    
-    if (eveningViews > 0 && morningViews > 0) {
-      return eveningViews - morningViews;
-    }
-    return 0;
-  };
-
-  const getMaxIncreaseVideoId = (date) => {
-    let maxIncrease = 0;
-    let maxVideoId = null;
-    
-    videos.forEach(video => {
-      const increase = getViewIncrease(video.id, date);
-      if (increase > maxIncrease) {
-        maxIncrease = increase;
-        maxVideoId = video.id;
-      }
-    });
-    
-    return maxVideoId;
-  };
-
-  const getDailyTotal = (date) => {
-    const morningKey = `${date}-morning`;
-    const eveningKey = `${date}-evening`;
-    
-    let morningTotal = 0;
-    let eveningTotal = 0;
-    
-    videos.forEach(video => {
-      morningTotal += viewData[morningKey]?.[video.id] || 0;
-      eveningTotal += viewData[eveningKey]?.[video.id] || 0;
-    });
-    
-    return eveningTotal > morningTotal ? eveningTotal - morningTotal : 0;
-  };
-
-  const generateCalendarDays = () => {
-    const [year, month] = selectedDate.split('-').map(Number);
-    const firstDay = new Date(year, month - 1, 1).getDay();
-    const daysInMonth = new Date(year, month, 0).getDate();
-    
-    const days = [];
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(i);
-    }
-    return days;
-  };
-
-  const startEditing = (time) => {
-    setEditingTime(time);
-  };
-
-  const maxIncreaseVideoId = getMaxIncreaseVideoId(selectedDate);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-red-500 p-3 rounded-xl">
-                <Eye className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-800">유튜브 조회수 추적기</h1>
-            </div>
-            <button
-              onClick={() => setShowCalendar(!showCalendar)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-            >
-              <Calendar className="w-5 h-5" />
-              달력 보기
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-              />
-              <span className="text-lg font-semibold text-gray-700">
-                일일 증가: <span className="text-green-600">+{getDailyTotal(selectedDate).toLocaleString()}</span>
-              </span>
-            </div>
-            
-            {videos.length < 20 && (
-              <button
-                onClick={() => setShowAddVideo(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-              >
-                <Plus className="w-5 h-5" />
-                영상 추가
-              </button>
-            )}
-          </div>
-
-          {showAddVideo && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newVideoTitle}
-                  onChange={(e) => setNewVideoTitle(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addVideo()}
-                  placeholder="영상 제목 입력"
-                  className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                  autoFocus
-                />
-                <button
-                  onClick={addVideo}
-                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
-                >
-                  추가
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddVideo(false);
-                    setNewVideoTitle('');
-                  }}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
-                >
-                  취소
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {['morning', 'evening'].map(time => (
-              <div key={time} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className={`w-5 h-5 ${time === 'morning' ? 'text-orange-500' : 'text-indigo-600'}`} />
-                    <h2 className="text-lg font-bold text-gray-800">
-                      {time === 'morning' ? '오전 기록' : '오후 기록'}
-                    </h2>
-                  </div>
-                  {editingTime === time ? (
-                    <button
-                      onClick={() => setEditingTime(null)}
-                      className="px-3 py-1 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition"
-                    >
-                      완료
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => startEditing(time)}
-                      className="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition"
-                    >
-                      입력
-                    </button>
-                  )}
-                </div>
-                
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {videos.map((video, idx) => {
-                    const key = `${selectedDate}-${time}`;
-                    const currentValue = viewData[key]?.[video.id] || '';
+            const loadData = () => {
+                try {
+                    const savedVideos = localStorage.getItem('youtube-videos');
+                    const savedViews = localStorage.getItem('youtube-views');
                     
-                    return (
-                      <div key={video.id} className="flex items-center gap-2 bg-white rounded-lg p-3 shadow-sm">
-                        <span className="text-sm font-semibold text-gray-500 w-6">{idx + 1}</span>
-                        <span className="flex-1 text-sm text-gray-700 truncate">{video.title}</span>
-                        {editingTime === time ? (
-                          <>
-                            <input
-                              type="number"
-                              value={currentValue}
-                              onChange={(e) => updateViews(video.id, e.target.value, time)}
-                              placeholder="조회수"
-                              className="w-28 px-2 py-1 border-2 border-gray-300 rounded text-sm focus:border-blue-500 focus:outline-none"
-                            />
-                            <button
-                              onClick={() => deleteVideo(video.id)}
-                              className="p-1 text-red-500 hover:bg-red-100 rounded transition"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </>
-                        ) : (
-                          <span className="text-sm font-semibold text-gray-700 w-28 text-right">
-                            {currentValue ? currentValue.toLocaleString() : '-'}
-                          </span>
+                    if (savedVideos) {
+                        setVideos(JSON.parse(savedVideos));
+                    }
+                    if (savedViews) {
+                        setViewData(JSON.parse(savedViews));
+                    }
+                } catch (error) {
+                    console.log('데이터 로딩 중 오류:', error);
+                }
+            };
+
+            const saveData = (newVideos, newViewData) => {
+                try {
+                    localStorage.setItem('youtube-videos', JSON.stringify(newVideos || videos));
+                    localStorage.setItem('youtube-views', JSON.stringify(newViewData || viewData));
+                } catch (error) {
+                    console.error('저장 실패:', error);
+                }
+            };
+
+            const addVideo = () => {
+                if (!newVideoTitle.trim()) return;
+                
+                const newVideo = {
+                    id: Date.now().toString(),
+                    title: newVideoTitle.trim()
+                };
+                
+                const updatedVideos = [...videos, newVideo];
+                setVideos(updatedVideos);
+                saveData(updatedVideos, viewData);
+                setNewVideoTitle('');
+                setShowAddVideo(false);
+            };
+
+            const deleteVideo = (videoId) => {
+                const updatedVideos = videos.filter(v => v.id !== videoId);
+                setVideos(updatedVideos);
+                saveData(updatedVideos, viewData);
+            };
+
+            const updateViews = (videoId, value, time) => {
+                const key = `${selectedDate}-${time}`;
+                const newViewData = { ...viewData };
+                
+                if (!newViewData[key]) {
+                    newViewData[key] = {};
+                }
+                
+                newViewData[key][videoId] = parseInt(value) || 0;
+                setViewData(newViewData);
+                saveData(videos, newViewData);
+            };
+
+            const getViewIncrease = (videoId, date) => {
+                const morningKey = `${date}-morning`;
+                const eveningKey = `${date}-evening`;
+                
+                const morningViews = viewData[morningKey]?.[videoId] || 0;
+                const eveningViews = viewData[eveningKey]?.[videoId] || 0;
+                
+                if (eveningViews > 0 && morningViews > 0) {
+                    return eveningViews - morningViews;
+                }
+                return 0;
+            };
+
+            const getMaxIncreaseVideoId = (date) => {
+                let maxIncrease = 0;
+                let maxVideoId = null;
+                
+                videos.forEach(video => {
+                    const increase = getViewIncrease(video.id, date);
+                    if (increase > maxIncrease) {
+                        maxIncrease = increase;
+                        maxVideoId = video.id;
+                    }
+                });
+                
+                return maxVideoId;
+            };
+
+            const getDailyTotal = (date) => {
+                const morningKey = `${date}-morning`;
+                const eveningKey = `${date}-evening`;
+                
+                let morningTotal = 0;
+                let eveningTotal = 0;
+                
+                videos.forEach(video => {
+                    morningTotal += viewData[morningKey]?.[video.id] || 0;
+                    eveningTotal += viewData[eveningKey]?.[video.id] || 0;
+                });
+                
+                return eveningTotal > morningTotal ? eveningTotal - morningTotal : 0;
+            };
+
+            const generateCalendarDays = () => {
+                const [year, month] = selectedDate.split('-').map(Number);
+                const firstDay = new Date(year, month - 1, 1).getDay();
+                const daysInMonth = new Date(year, month, 0).getDate();
+                
+                const days = [];
+                for (let i = 0; i < firstDay; i++) {
+                    days.push(null);
+                }
+                for (let i = 1; i <= daysInMonth; i++) {
+                    days.push(i);
+                }
+                return days;
+            };
+
+            const startEditing = (time) => {
+                setEditingTime(time);
+            };
+
+            const maxIncreaseVideoId = getMaxIncreaseVideoId(selectedDate);
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 p-4">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-red-500 p-3 rounded-xl">
+                                        <Eye className="w-6 h-6 text-white" />
+                                    </div>
+                                    <h1 className="text-2xl font-bold text-gray-800">유튜브 조회수 추적기</h1>
+                                </div>
+                                <button
+                                    onClick={() => setShowCalendar(!showCalendar)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                                >
+                                    <Calendar className="w-5 h-5" />
+                                    달력 보기
+                                </button>
+                            </div>
+
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="date"
+                                        value={selectedDate}
+                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                        className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                                    />
+                                    <span className="text-lg font-semibold text-gray-700">
+                                        일일 증가: <span className="text-green-600">+{getDailyTotal(selectedDate).toLocaleString()}</span>
+                                    </span>
+                                </div>
+                                
+                                {videos.length < 20 && (
+                                    <button
+                                        onClick={() => setShowAddVideo(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                                    >
+                                        <Plus className="w-5 h-5" />
+                                        영상 추가
+                                    </button>
+                                )}
+                            </div>
+
+                            {showAddVideo && (
+                                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newVideoTitle}
+                                            onChange={(e) => setNewVideoTitle(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && addVideo()}
+                                            placeholder="영상 제목 입력"
+                                            className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                                            autoFocus
+                                        />
+                                        <button
+                                            onClick={addVideo}
+                                            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                                        >
+                                            추가
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowAddVideo(false);
+                                                setNewVideoTitle('');
+                                            }}
+                                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                                        >
+                                            취소
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {['morning', 'evening'].map(time => (
+                                    <div key={time} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <Clock className={`w-5 h-5 ${time === 'morning' ? 'text-orange-500' : 'text-indigo-600'}`} />
+                                                <h2 className="text-lg font-bold text-gray-800">
+                                                    {time === 'morning' ? '오전 기록' : '오후 기록'}
+                                                </h2>
+                                            </div>
+                                            {editingTime === time ? (
+                                                <button
+                                                    onClick={() => setEditingTime(null)}
+                                                    className="px-3 py-1 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition"
+                                                >
+                                                    완료
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => startEditing(time)}
+                                                    className="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition"
+                                                >
+                                                    입력
+                                                </button>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                                            {videos.map((video, idx) => {
+                                                const key = `${selectedDate}-${time}`;
+                                                const currentValue = viewData[key]?.[video.id] || '';
+                                                
+                                                return (
+                                                    <div key={video.id} className="flex items-center gap-2 bg-white rounded-lg p-3 shadow-sm">
+                                                        <span className="text-sm font-semibold text-gray-500 w-6">{idx + 1}</span>
+                                                        <span className="flex-1 text-sm text-gray-700 truncate">{video.title}</span>
+                                                        {editingTime === time ? (
+                                                            <>
+                                                                <input
+                                                                    type="number"
+                                                                    value={currentValue}
+                                                                    onChange={(e) => updateViews(video.id, e.target.value, time)}
+                                                                    placeholder="조회수"
+                                                                    className="w-28 px-2 py-1 border-2 border-gray-300 rounded text-sm focus:border-blue-500 focus:outline-none"
+                                                                />
+                                                                <button
+                                                                    onClick={() => deleteVideo(video.id)}
+                                                                    className="p-1 text-red-500 hover:bg-red-100 rounded transition"
+                                                                >
+                                                                    <X className="w-4 h-4" />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-sm font-semibold text-gray-700 w-28 text-right">
+                                                                {currentValue ? currentValue.toLocaleString() : '-'}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {videos.length > 0 && (
+                                <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                        <TrendingUp className="w-5 h-5 text-green-600" />
+                                        오늘의 증가량
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {videos.map((video, idx) => {
+                                            const increase = getViewIncrease(video.id, selectedDate);
+                                            const isTopIncrease = video.id === maxIncreaseVideoId && increase > 0;
+                                            
+                                            return (
+                                                <div 
+                                                    key={video.id} 
+                                                    className={`rounded-lg p-3 shadow-sm transition-all ${
+                                                        isTopIncrease 
+                                                            ? 'bg-gradient-to-br from-red-100 to-pink-100 border-2 border-red-300 shadow-lg' 
+                                                            : 'bg-white'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm text-gray-700 truncate flex-1">
+                                                            {idx + 1}. {video.title}
+                                                        </span>
+                                                        <span className={`text-sm font-bold ml-2 ${increase > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                                                            {increase > 0 ? `+${increase.toLocaleString()}` : '-'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {showCalendar && (
+                            <div className="bg-white rounded-2xl shadow-xl p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-bold text-gray-800">조회수 증가 달력</h2>
+                                    <button
+                                        onClick={() => setShowCalendar(false)}
+                                        className="p-2 hover:bg-gray-100 rounded-lg transition"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                
+                                <div className="grid grid-cols-7 gap-2">
+                                    {['일', '월', '화', '수', '목', '금', '토'].map(day => (
+                                        <div key={day} className="text-center font-bold text-gray-600 py-2">
+                                            {day}
+                                        </div>
+                                    ))}
+                                    
+                                    {generateCalendarDays().map((day, idx) => {
+                                        if (!day) return <div key={idx} />;
+                                        
+                                        const [year, month] = selectedDate.split('-');
+                                        const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
+                                        const increase = getDailyTotal(dateStr);
+                                        const isToday = dateStr === new Date().toISOString().split('T')[0];
+                                        const isSelected = dateStr === selectedDate;
+                                        
+                                        return (
+                                            <button
+                                                key={idx}
+                                                onClick={() => setSelectedDate(dateStr)}
+                                                className={`p-3 rounded-lg text-center transition ${
+                                                    isSelected
+                                                        ? 'bg-blue-500 text-white shadow-lg'
+                                                        : isToday
+                                                        ? 'bg-yellow-100 hover:bg-yellow-200'
+                                                        : 'hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <div className="font-semibold">{day}</div>
+                                                {increase > 0 && (
+                                                    <div className={`text-xs mt-1 font-bold ${isSelected ? 'text-white' : 'text-green-600'}`}>
+                                                        +{increase > 999 ? `${(increase / 1000).toFixed(1)}k` : increase}
+                                                    </div>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {videos.length > 0 && (
-            <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5">
-              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-                오늘의 증가량
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {videos.map((video, idx) => {
-                  const increase = getViewIncrease(video.id, selectedDate);
-                  const isTopIncrease = video.id === maxIncreaseVideoId && increase > 0;
-                  
-                  return (
-                    <div 
-                      key={video.id} 
-                      className={`rounded-lg p-3 shadow-sm transition-all ${
-                        isTopIncrease 
-                          ? 'bg-gradient-to-br from-red-100 to-pink-100 border-2 border-red-300 shadow-lg' 
-                          : 'bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700 truncate flex-1">
-                          {idx + 1}. {video.title}
-                        </span>
-                        <span className={`text-sm font-bold ml-2 ${increase > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                          {increase > 0 ? `+${increase.toLocaleString()}` : '-'}
-                        </span>
-                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {showCalendar && (
-          <div className="bg-white rounded-2xl shadow-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-800">조회수 증가 달력</h2>
-              <button
-                onClick={() => setShowCalendar(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-7 gap-2">
-              {['일', '월', '화', '수', '목', '금', '토'].map(day => (
-                <div key={day} className="text-center font-bold text-gray-600 py-2">
-                  {day}
                 </div>
-              ))}
-              
-              {generateCalendarDays().map((day, idx) => {
-                if (!day) return <div key={idx} />;
-                
-                const [year, month] = selectedDate.split('-');
-                const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
-                const increase = getDailyTotal(dateStr);
-                const isToday = dateStr === new Date().toISOString().split('T')[0];
-                const isSelected = dateStr === selectedDate;
-                
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedDate(dateStr)}
-                    className={`p-3 rounded-lg text-center transition ${
-                      isSelected
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : isToday
-                        ? 'bg-yellow-100 hover:bg-yellow-200'
-                        : 'hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="font-semibold">{day}</div>
-                    {increase > 0 && (
-                      <div className={`text-xs mt-1 font-bold ${isSelected ? 'text-white' : 'text-green-600'}`}>
-                        +{increase > 999 ? `${(increase / 1000).toFixed(1)}k` : increase}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<YouTubeViewTracker />);
+    </script>
+</body>
+</html>
