@@ -102,7 +102,10 @@
 
             const saveData = async (data) => {
                 try {
-                    await window.storage.set('listener-data', JSON.stringify(data));
+                    const result = await window.storage.set('listener-data', JSON.stringify(data));
+                    if (!result) {
+                        console.error('데이터 저장 실패');
+                    }
                 } catch (error) {
                     console.error('저장 오류:', error);
                 }
@@ -172,20 +175,28 @@
                         return;
                     }
                     try {
-                        await window.storage.set('app-password', passwordInput);
-                        setSavedPassword(passwordInput);
-                        setIsAuthenticated(true);
-                        setPasswordError('');
+                        const result = await window.storage.set('app-password', passwordInput);
+                        if (result) {
+                            setSavedPassword(passwordInput);
+                            setIsAuthenticated(true);
+                            setPasswordError('');
+                            setPasswordInput('');
+                        } else {
+                            setPasswordError('비밀번호 저장에 실패했습니다. 다시 시도해주세요.');
+                        }
                     } catch (error) {
-                        setPasswordError('비밀번호 저장 오류');
+                        console.error('비밀번호 저장 오류:', error);
+                        setPasswordError('비밀번호 저장 중 오류가 발생했습니다: ' + error.message);
                     }
                 } else {
                     // 비밀번호 확인
                     if (passwordInput === savedPassword) {
                         setIsAuthenticated(true);
                         setPasswordError('');
+                        setPasswordInput('');
                     } else {
                         setPasswordError('비밀번호가 일치하지 않습니다');
+                        setPasswordInput('');
                     }
                 }
             };
