@@ -3,244 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube 재생목록 자동재생</title>
+    <title>멜론 일간 감상자수 관리</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+        .mint-gradient {
+            background: linear-gradient(135deg, #e0f7f4 0%, #b2f5ea 50%, #81e6d9 100%);
         }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            margin-top: 20px;
+        .mint-button {
+            background: linear-gradient(135deg, #4fd1c5 0%, #38b2ac 100%);
         }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        
-        .status {
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            font-size: 0.9em;
-        }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #4ade80;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
-        }
-        
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        .controls {
-            padding: 20px;
-            background: #f8fafc;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #334155;
-        }
-        
-        .btn-secondary:hover {
-            background: #cbd5e1;
-        }
-        
-        .logs {
-            padding: 20px;
-            background: #1e293b;
-            color: #e2e8f0;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .log-entry {
-            padding: 5px 0;
-            border-bottom: 1px solid #334155;
-        }
-        
-        .log-time {
-            color: #94a3b8;
-            margin-right: 10px;
+        .mint-button:hover {
+            background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎵 YouTube 재생목록 자동재생</h1>
-            <div class="status">
-                <span class="status-indicator"></span>
-                <span id="statusText">자동재생 활성화됨</span>
-            </div>
-        </div>
-        
-        <div class="video-container">
-            <iframe 
-                id="youtubePlayer"
-                src="https://www.youtube.com/embed/videoseries?list=PLfuYGpnnSBu1v-uyEw7ZeaOc3WoxjIyS6&autoplay=1&loop=1"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-            </iframe>
-        </div>
-        
-        <div class="controls">
-            <button class="btn-primary" onclick="reloadPlayer()">🔄 플레이어 새로고침</button>
-            <button class="btn-secondary" onclick="toggleAutoplay()">⚙️ 자동재생 토글</button>
-            <button class="btn-secondary" onclick="clearLogs()">🗑️ 로그 지우기</button>
-        </div>
-        
-        <div class="logs" id="logContainer">
-            <div class="log-entry">
-                <span class="log-time">[시작]</span>
-                <span>자동재생 모드가 활성화되었습니다.</span>
-            </div>
-        </div>
-    </div>
+    <div id="root"></div>
 
-    <script>
-        let autoplayEnabled = true;
-        
-        function addLog(message) {
-            const logContainer = document.getElementById('logContainer');
-            const time = new Date().toLocaleTimeString('ko-KR');
-            const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
-            logEntry.innerHTML = `
-                <span class="log-time">[${time}]</span>
-                <span>${message}</span>
-            `;
-            logContainer.appendChild(logEntry);
-            logContainer.scrollTop = logContainer.scrollHeight;
-        }
-        
-        function reloadPlayer() {
-            const iframe = document.getElementById('youtubePlayer');
-            iframe.src = iframe.src;
-            addLog('플레이어를 새로고침했습니다.');
-        }
-        
-        function toggleAutoplay() {
-            autoplayEnabled = !autoplayEnabled;
-            const statusText = document.getElementById('statusText');
-            const iframe = document.getElementById('youtubePlayer');
-            
-            if (autoplayEnabled) {
-                iframe.src = iframe.src.replace('autoplay=0', 'autoplay=1');
-                statusText.textContent = '자동재생 활성화됨';
-                addLog('✅ 자동재생이 활성화되었습니다.');
-            } else {
-                iframe.src = iframe.src.replace('autoplay=1', 'autoplay=0');
-                statusText.textContent = '자동재생 비활성화됨';
-                addLog('⏸️ 자동재생이 비활성화되었습니다.');
-            }
-        }
-        
-        function clearLogs() {
-            const logContainer = document.getElementById('logContainer');
-            logContainer.innerHTML = `
-                <div class="log-entry">
-                    <span class="log-time">[클리어]</span>
-                    <span>로그가 지워졌습니다.</span>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const ChevronLeft = () => (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        );
+
+        const ChevronRight = () => (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        );
+
+        const Music = () => (
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18V5l12-2v13"></path>
+                <circle cx="6" cy="18" r="3"></circle>
+                <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+        );
+
+        const TrendingUp = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+        );
+
+        const MusicListenerCalendar = () => {
+            const [currentDate, setCurrentDate] = useState(new Date());
+            const [selectedDate, setSelectedDate] = useState(null);
+            const [showPopup, setShowPopup] = useState(false);
+            const [listenerData, setListenerData] = useState({});
+            const [songs] = useState([
+                '노래 1', '노래 2', '노래 3', '노래 4', '노래 5',
+                '노래 6', '노래 7', '노래 8', '노래 9', '노래 10',
+                '노래 11', '노래 12', '노래 13', '노래 14', '노래 15'
+            ]);
+
+            useEffect(() => {
+                loadData();
+            }, []);
+
+            const loadData = async () => {
+                try {
+                    const result = await window.storage.get('listener-data');
+                    if (result) {
+                        setListenerData(JSON.parse(result.value));
+                    }
+                } catch (error) {
+                    console.log('데이터 없음, 새로 시작합니다');
+                }
+            };
+
+            const saveData = async (data) => {
+                try {
+                    await window.storage.set('listener-data', JSON.stringify(data));
+                } catch (error) {
+                    console.error('저장 오류:', error);
+                }
+            };
+
+            const getDaysInMonth = (date) => {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startingDayOfWeek = firstDay.getDay();
+                
+                return { daysInMonth, startingDayOfWeek };
+            };
+
+            const formatDateKey = (date) => {
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            };
+
+            const handleDateClick = (day) => {
+                const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                setSelectedDate(clickedDate);
+                setShowPopup(true);
+            };
+
+            const handleSaveListeners = (songIndex, count) => {
+                const dateKey = formatDateKey(selectedDate);
+                const newData = { ...listenerData };
+                
+                if (!newData[dateKey]) {
+                    newData[dateKey] = {};
+                }
+                
+                newData[dateKey][songIndex] = parseInt(count) || 0;
+                setListenerData(newData);
+                saveData(newData);
+            };
+
+            const getTotalListeners = (date) => {
+                const dateKey = formatDateKey(date);
+                const dayData = listenerData[dateKey];
+                if (!dayData) return 0;
+                
+                return Object.values(dayData).reduce((sum, count) => sum + count, 0);
+            };
+
+            const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentDate);
+            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+            const changeMonth = (direction) => {
+                setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + direction, 1));
+            };
+
+            const selectedDateKey = selectedDate ? formatDateKey(selectedDate) : null;
+            const selectedDateData = selectedDateKey ? listenerData[selectedDateKey] || {} : {};
+
+            return (
+                <div className="min-h-screen mint-gradient p-4 md:p-8">
+                    <div className="max-w-5xl mx-auto">
+                        {/* 헤더 */}
+                        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 border-2 border-teal-200">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl">
+                                        <Music />
+                                    </div>
+                                    <div>
+                                        <h1 className="text-3xl font-bold text-gray-800">멜론 일간 감상자수</h1>
+                                        <p className="text-sm text-teal-600 font-medium mt-1">© 민호특공대</p>
+                                    </div>
+                                </div>
+                                <div className="text-sm text-gray-600 bg-teal-50 px-4 py-2 rounded-lg border border-teal-200">
+                                    <span className="font-semibold text-teal-700">15곡 트래킹</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 캘린더 */}
+                        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-teal-200">
+                            {/* 월 네비게이션 */}
+                            <div className="flex items-center justify-between mb-6">
+                                <button
+                                    onClick={() => changeMonth(-1)}
+                                    className="p-2 hover:bg-teal-50 rounded-lg transition text-teal-700"
+                                >
+                                    <ChevronLeft />
+                                </button>
+                                
+                                <h2 className="text-2xl font-bold text-gray-800">
+                                    {currentDate.getFullYear()}년 {monthNames[currentDate.getMonth()]}
+                                </h2>
+                                
+                                <button
+                                    onClick={() => changeMonth(1)}
+                                    className="p-2 hover:bg-teal-50 rounded-lg transition text-teal-700"
+                                >
+                                    <ChevronRight />
+                                </button>
+                            </div>
+
+                            {/* 요일 헤더 */}
+                            <div className="grid grid-cols-7 gap-2 mb-2">
+                                {dayNames.map((day, idx) => (
+                                    <div key={idx} className="text-center font-semibold text-teal-700 py-2 bg-teal-50 rounded-lg">
+                                        {day}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* 날짜 그리드 */}
+                            <div className="grid grid-cols-7 gap-2">
+                                {Array.from({ length: startingDayOfWeek }).map((_, idx) => (
+                                    <div key={`empty-${idx}`} className="aspect-square" />
+                                ))}
+                                
+                                {Array.from({ length: daysInMonth }).map((_, idx) => {
+                                    const day = idx + 1;
+                                    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                                    const totalListeners = getTotalListeners(date);
+                                    const hasData = totalListeners > 0;
+                                    
+                                    return (
+                                        <button
+                                            key={day}
+                                            onClick={() => handleDateClick(day)}
+                                            className="aspect-square rounded-lg border-2 border-teal-200 hover:border-teal-400 hover:bg-teal-50 transition p-2 flex flex-col items-center justify-center group relative bg-white"
+                                        >
+                                            <span className="text-lg font-semibold text-gray-700 mb-1">{day}</span>
+                                            {hasData && (
+                                                <div className="flex flex-col items-center">
+                                                    <TrendingUp size={16} />
+                                                    <span className="text-xs font-bold text-teal-600 mt-1">
+                                                        {totalListeners.toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 팝업 */}
+                    {showPopup && selectedDate && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border-4 border-teal-300">
+                                {/* 팝업 헤더 */}
+                                <div className="mint-button text-white p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-2xl font-bold mb-1">
+                                                {selectedDate.getFullYear()}년 {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일
+                                            </h3>
+                                            <p className="text-teal-100">감상자 수를 입력하세요</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowPopup(false)}
+                                            className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition"
+                                        >
+                                            <span className="text-2xl">×</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* 팝업 내용 */}
+                                <div className="flex-1 overflow-y-auto p-6">
+                                    <div className="space-y-3">
+                                        {songs.map((song, idx) => (
+                                            <div key={idx} className="flex items-center gap-4 p-4 bg-teal-50 rounded-lg hover:bg-teal-100 transition border border-teal-200">
+                                                <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-teal-400 to-teal-600 rounded-lg text-white">
+                                                    <span className="font-bold">{idx + 1}</span>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <label className="font-medium text-gray-700">{song}</label>
+                                                </div>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={selectedDateData[idx] || ''}
+                                                    onChange={(e) => handleSaveListeners(idx, e.target.value)}
+                                                    placeholder="0"
+                                                    className="w-32 px-4 py-2 border-2 border-teal-300 rounded-lg focus:border-teal-500 focus:outline-none text-right font-semibold"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* 팝업 푸터 */}
+                                <div className="border-t-2 border-teal-200 p-6 bg-teal-50">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <TrendingUp size={20} />
+                                            <span className="text-sm text-gray-600">총 감상자 수:</span>
+                                            <span className="text-xl font-bold text-teal-600">
+                                                {Object.values(selectedDateData).reduce((sum, count) => sum + count, 0).toLocaleString()}명
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowPopup(false)}
+                                            className="mint-button px-6 py-2 text-white rounded-lg transition font-semibold shadow-lg"
+                                        >
+                                            완료
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
-            `;
-        }
-        
-        // 페이지 로드 시 자동 실행
-        window.addEventListener('load', function() {
-            addLog('페이지가 로드되었습니다.');
-            addLog('재생목록이 자동으로 재생됩니다.');
-        });
-        
-        // 에러 감지
-        window.addEventListener('error', function(e) {
-            addLog('⚠️ 오류 발생: ' + e.message);
-        });
-        
-        // 페이지 가시성 변경 감지
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                addLog('📱 탭이 백그라운드로 이동했습니다.');
-            } else {
-                addLog('👁️ 탭이 다시 활성화되었습니다.');
-            }
-        });
+            );
+        };
+
+        ReactDOM.render(<MusicListenerCalendar />, document.getElementById('root'));
     </script>
 </body>
 </html>
