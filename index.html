@@ -142,12 +142,7 @@
     <div class="container">
         <h1>🎵 Overnight JangMinHo</h1>
         
-        <div class="playlist-input">
-            <input type="text" 
-                   id="playlistId" 
-                   placeholder="재생목록 ID를 입력하세요 (예: PLfuYGpnnSBu24ryeO51pagt62smucmmGv)"
-                   value="PLfuYGpnnSBu24ryeO51pagt62smucmmGv">
-        </div>
+
 
         <div class="player-wrapper">
             <iframe id="player" 
@@ -158,7 +153,6 @@
         </div>
 
         <div class="controls">
-            <button onclick="loadPlaylist()">재생목록 로드</button>
             <button onclick="openInYoutube()">유튜브에서 열기</button>
         </div>
 
@@ -174,23 +168,8 @@
     </div>
 
     <script>
-        function loadPlaylist() {
-            const playlistId = document.getElementById('playlistId').value.trim();
-            if (!playlistId) {
-                alert('재생목록 ID를 입력해주세요!');
-                return;
-            }
-
-            const iframe = document.getElementById('player');
-            iframe.src = `https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=1`;
-        }
-
         function openInYoutube() {
-            const playlistId = document.getElementById('playlistId').value.trim();
-            if (!playlistId) {
-                alert('재생목록 ID를 입력해주세요!');
-                return;
-            }
+            const playlistId = 'PLfuYGpnnSBu24ryeO51pagt62smucmmGv';
             window.open(`https://www.youtube.com/playlist?list=${playlistId}`, '_blank');
         }
 
