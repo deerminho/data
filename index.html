@@ -3,503 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>유튜브 조회수 추적기</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.5/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>유튜브 재생목록 플레이어</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            box-sizing: border-box;
         }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
+
+        h1 {
+            color: #2dd4bf;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
+
+        .player-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(45, 212, 191, 0.3);
+            margin-bottom: 25px;
+        }
+
+        .player-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 212, 191, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 212, 191, 0.6);
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            background: linear-gradient(135deg, #e0f7f4 0%, #ccf5f0 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #2dd4bf;
+        }
+
+        .info h3 {
+            color: #0d9488;
+            margin-bottom: 10px;
+        }
+
+        .info p {
+            color: #115e59;
+            line-height: 1.6;
+        }
+
+        .playlist-input {
+            margin-bottom: 20px;
+        }
+
+        .playlist-input input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #2dd4bf;
+            border-radius: 50px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .playlist-input input:focus {
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div class="container">
+        <h1>🎵 Overnight JangMinHo</h1>
+        
+        <div class="playlist-input">
+            <input type="text" 
+                   id="playlistId" 
+                   placeholder="재생목록 ID를 입력하세요 (예: PLfuYGpnnSBu24ryeO51pagt62smucmmGv)"
+                   value="PLfuYGpnnSBu24ryeO51pagt62smucmmGv">
+        </div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { Calendar, TrendingUp, Plus, X, Eye, Clock, BarChart3, ChevronLeft, ChevronRight } = lucide;
+        <div class="player-wrapper">
+            <iframe id="player" 
+                    src="https://www.youtube.com/embed/videoseries?list=PLfuYGpnnSBu24ryeO51pagt62smucmmGv&autoplay=1"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+            </iframe>
+        </div>
 
-        function YouTubeViewTracker() {
-            const [videos, setVideos] = useState([]);
-            const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-            const [showCalendar, setShowCalendar] = useState(false);
-            const [showAddVideo, setShowAddVideo] = useState(false);
-            const [newVideoTitle, setNewVideoTitle] = useState('');
-            const [viewData, setViewData] = useState({});
-            const [editingTime, setEditingTime] = useState(null);
-            const [calendarMonth, setCalendarMonth] = useState(new Date());
+        <div class="controls">
+            <button onclick="loadPlaylist()">재생목록 로드</button>
+            <button onclick="openInYoutube()">유튜브에서 열기</button>
+        </div>
 
-            useEffect(() => {
-                loadData();
-            }, []);
+        <div class="info">
+            <h3>💡 사용 방법</h3>
+            <p>
+                • 위 입력창에 유튜브 재생목록 ID를 입력하고 "재생목록 로드" 버튼을 클릭하세요.<br>
+                • 재생목록은 자동으로 연속 재생됩니다.<br>
+                • 재생목록 ID는 URL에서 "list=" 뒤의 문자열입니다.<br>
+                • 예: youtube.com/playlist?list=<strong>PLfuYGpnnSBu24ryeO51pagt62smucmmGv</strong>
+            </p>
+        </div>
+    </div>
 
-            const loadData = () => {
-                try {
-                    const savedVideos = localStorage.getItem('youtube-videos');
-                    const savedViews = localStorage.getItem('youtube-views');
-                    
-                    if (savedVideos) {
-                        setVideos(JSON.parse(savedVideos));
-                    }
-                    if (savedViews) {
-                        setViewData(JSON.parse(savedViews));
-                    }
-                } catch (error) {
-                    console.log('데이터 로딩 중 오류:', error);
-                }
-            };
+    <script>
+        function loadPlaylist() {
+            const playlistId = document.getElementById('playlistId').value.trim();
+            if (!playlistId) {
+                alert('재생목록 ID를 입력해주세요!');
+                return;
+            }
 
-            const saveData = (newVideos, newViewData) => {
-                try {
-                    localStorage.setItem('youtube-videos', JSON.stringify(newVideos || videos));
-                    localStorage.setItem('youtube-views', JSON.stringify(newViewData || viewData));
-                } catch (error) {
-                    console.error('저장 실패:', error);
-                }
-            };
-
-            const addVideo = () => {
-                if (!newVideoTitle.trim()) return;
-                
-                const newVideo = {
-                    id: Date.now().toString(),
-                    title: newVideoTitle.trim()
-                };
-                
-                const updatedVideos = [...videos, newVideo];
-                setVideos(updatedVideos);
-                saveData(updatedVideos, viewData);
-                setNewVideoTitle('');
-                setShowAddVideo(false);
-            };
-
-            const deleteVideo = (videoId) => {
-                if (!confirm('정말 이 영상을 삭제하시겠습니까?')) return;
-                const updatedVideos = videos.filter(v => v.id !== videoId);
-                setVideos(updatedVideos);
-                saveData(updatedVideos, viewData);
-            };
-
-            const updateViews = (videoId, value, time) => {
-                const key = `${selectedDate}-${time}`;
-                const newViewData = { ...viewData };
-                
-                if (!newViewData[key]) {
-                    newViewData[key] = {};
-                }
-                
-                newViewData[key][videoId] = parseInt(value) || 0;
-                setViewData(newViewData);
-                saveData(videos, newViewData);
-            };
-
-            const getViewIncrease = (videoId, date) => {
-                const morningKey = `${date}-morning`;
-                const eveningKey = `${date}-evening`;
-                
-                const morningViews = viewData[morningKey]?.[videoId] || 0;
-                const eveningViews = viewData[eveningKey]?.[videoId] || 0;
-                
-                if (eveningViews > 0 && morningViews > 0) {
-                    return eveningViews - morningViews;
-                }
-                return 0;
-            };
-
-            const getMaxIncreaseVideoId = (date) => {
-                let maxIncrease = 0;
-                let maxVideoId = null;
-                
-                videos.forEach(video => {
-                    const increase = getViewIncrease(video.id, date);
-                    if (increase > maxIncrease) {
-                        maxIncrease = increase;
-                        maxVideoId = video.id;
-                    }
-                });
-                
-                return maxVideoId;
-            };
-
-            const getDailyTotal = (date) => {
-                const morningKey = `${date}-morning`;
-                const eveningKey = `${date}-evening`;
-                
-                let morningTotal = 0;
-                let eveningTotal = 0;
-                
-                videos.forEach(video => {
-                    morningTotal += viewData[morningKey]?.[video.id] || 0;
-                    eveningTotal += viewData[eveningKey]?.[video.id] || 0;
-                });
-                
-                return eveningTotal > morningTotal ? eveningTotal - morningTotal : 0;
-            };
-
-            const generateCalendarDays = () => {
-                const year = calendarMonth.getFullYear();
-                const month = calendarMonth.getMonth();
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                
-                const days = [];
-                for (let i = 0; i < firstDay; i++) {
-                    days.push(null);
-                }
-                for (let i = 1; i <= daysInMonth; i++) {
-                    days.push(i);
-                }
-                return days;
-            };
-
-            const changeMonth = (delta) => {
-                const newMonth = new Date(calendarMonth);
-                newMonth.setMonth(newMonth.getMonth() + delta);
-                setCalendarMonth(newMonth);
-            };
-
-            const startEditing = (time) => {
-                setEditingTime(time);
-            };
-
-            const getTotalViews = (time) => {
-                const key = `${selectedDate}-${time}`;
-                let total = 0;
-                videos.forEach(video => {
-                    total += viewData[key]?.[video.id] || 0;
-                });
-                return total;
-            };
-
-            const maxIncreaseVideoId = getMaxIncreaseVideoId(selectedDate);
-
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-purple-50 p-4">
-                    <div className="max-w-7xl mx-auto">
-                        {/* 헤더 */}
-                        <div className="bg-white rounded-2xl shadow-2xl p-6 mb-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-gradient-to-br from-red-500 to-pink-600 p-3 rounded-xl shadow-lg">
-                                        <Eye className="w-7 h-7 text-white" />
-                                    </div>
-                                    <div>
-                                        <h1 className="text-3xl font-bold text-gray-800">유튜브 조회수 추적기</h1>
-                                        <p className="text-sm text-gray-500 mt-1">최대 20개 영상의 일일 조회수를 추적하세요</p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => setShowCalendar(!showCalendar)}
-                                    className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all duration-200 font-semibold"
-                                >
-                                    <Calendar className="w-5 h-5" />
-                                    {showCalendar ? '달력 닫기' : '달력 보기'}
-                                </button>
-                            </div>
-
-                            {/* 날짜 선택 및 통계 */}
-                            <div className="flex flex-wrap items-center justify-between gap-4 mb-6 bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl">
-                                <div className="flex items-center gap-4">
-                                    <input
-                                        type="date"
-                                        value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                        className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none font-semibold"
-                                    />
-                                    <div className="flex gap-4">
-                                        <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                                            <span className="text-sm text-gray-600">일일 증가:</span>
-                                            <span className="ml-2 text-lg font-bold text-green-600">+{getDailyTotal(selectedDate).toLocaleString()}</span>
-                                        </div>
-                                        <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
-                                            <span className="text-sm text-gray-600">영상 수:</span>
-                                            <span className="ml-2 text-lg font-bold text-blue-600">{videos.length}/20</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                {videos.length < 20 && (
-                                    <button
-                                        onClick={() => setShowAddVideo(true)}
-                                        className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all duration-200 font-semibold"
-                                    >
-                                        <Plus className="w-5 h-5" />
-                                        영상 추가
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* 영상 추가 폼 */}
-                            {showAddVideo && (
-                                <div className="mb-6 p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={newVideoTitle}
-                                            onChange={(e) => setNewVideoTitle(e.target.value)}
-                                            onKeyPress={(e) => e.key === 'Enter' && addVideo()}
-                                            placeholder="영상 제목을 입력하세요 (예: 브이로그 #1)"
-                                            className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none font-medium"
-                                            autoFocus
-                                        />
-                                        <button
-                                            onClick={addVideo}
-                                            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-semibold"
-                                        >
-                                            추가
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowAddVideo(false);
-                                                setNewVideoTitle('');
-                                            }}
-                                            className="px-4 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold"
-                                        >
-                                            취소
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* 오전/오후 기록 */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {['morning', 'evening'].map(time => (
-                                    <div key={time} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 shadow-lg">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-lg ${time === 'morning' ? 'bg-orange-100' : 'bg-indigo-100'}`}>
-                                                    <Clock className={`w-5 h-5 ${time === 'morning' ? 'text-orange-600' : 'text-indigo-600'}`} />
-                                                </div>
-                                                <div>
-                                                    <h2 className="text-lg font-bold text-gray-800">
-                                                        {time === 'morning' ? '오전 기록 (9-12시)' : '오후 기록 (18-21시)'}
-                                                    </h2>
-                                                    <p className="text-xs text-gray-600">
-                                                        총 조회수: {getTotalViews(time).toLocaleString()}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            {editingTime === time ? (
-                                                <button
-                                                    onClick={() => setEditingTime(null)}
-                                                    className="px-4 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition font-semibold shadow-md"
-                                                >
-                                                    ✓ 완료
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => startEditing(time)}
-                                                    className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition font-semibold shadow-md"
-                                                >
-                                                    입력하기
-                                                </button>
-                                            )}
-                                        </div>
-                                        
-                                        <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
-                                            {videos.length === 0 ? (
-                                                <div className="text-center py-8 text-gray-500">
-                                                    <Eye className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                                                    <p>영상을 추가해주세요</p>
-                                                </div>
-                                            ) : (
-                                                videos.map((video, idx) => {
-                                                    const key = `${selectedDate}-${time}`;
-                                                    const currentValue = viewData[key]?.[video.id] || '';
-                                                    
-                                                    return (
-                                                        <div key={video.id} className="flex items-center gap-2 bg-white rounded-lg p-3 shadow-md hover:shadow-lg transition">
-                                                            <span className="text-sm font-bold text-gray-500 w-7 h-7 flex items-center justify-center bg-gray-100 rounded-full">{idx + 1}</span>
-                                                            <span className="flex-1 text-sm text-gray-700 truncate font-medium">{video.title}</span>
-                                                            {editingTime === time ? (
-                                                                <>
-                                                                    <input
-                                                                        type="number"
-                                                                        value={currentValue}
-                                                                        onChange={(e) => updateViews(video.id, e.target.value, time)}
-                                                                        placeholder="조회수"
-                                                                        className="w-32 px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:outline-none font-semibold"
-                                                                    />
-                                                                    <button
-                                                                        onClick={() => deleteVideo(video.id)}
-                                                                        className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition"
-                                                                    >
-                                                                        <X className="w-4 h-4" />
-                                                                    </button>
-                                                                </>
-                                                            ) : (
-                                                                <span className="text-sm font-bold text-gray-700 w-32 text-right">
-                                                                    {currentValue ? currentValue.toLocaleString() + ' 회' : '-'}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* 증가량 분석 */}
-                            {videos.length > 0 && (
-                                <div className="mt-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 shadow-lg border-2 border-green-200">
-                                    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                        <BarChart3 className="w-6 h-6 text-green-600" />
-                                        {selectedDate} 증가량 분석
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {videos.map((video, idx) => {
-                                            const increase = getViewIncrease(video.id, selectedDate);
-                                            const isTopIncrease = video.id === maxIncreaseVideoId && increase > 0;
-                                            
-                                            return (
-                                                <div 
-                                                    key={video.id} 
-                                                    className={`rounded-xl p-4 shadow-md transition-all ${
-                                                        isTopIncrease 
-                                                            ? 'bg-gradient-to-br from-yellow-100 to-amber-100 border-2 border-yellow-400 shadow-xl transform scale-105' 
-                                                            : 'bg-white hover:shadow-lg'
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start justify-between gap-2">
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <span className="font-bold text-gray-500">#{idx + 1}</span>
-                                                                {isTopIncrease && <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded-full font-bold">🏆 1위</span>}
-                                                            </div>
-                                                            <p className="text-sm text-gray-700 truncate font-medium">{video.title}</p>
-                                                        </div>
-                                                        <span className={`text-lg font-bold whitespace-nowrap ${increase > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                                                            {increase > 0 ? `+${increase.toLocaleString()}` : '-'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 달력 */}
-                        {showCalendar && (
-                            <div className="bg-white rounded-2xl shadow-2xl p-6 animate-fadeIn">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                                        <Calendar className="w-6 h-6 text-blue-600" />
-                                        월별 조회수 증가 현황
-                                    </h2>
-                                    <button
-                                        onClick={() => setShowCalendar(false)}
-                                        className="p-2 hover:bg-gray-100 rounded-lg transition"
-                                    >
-                                        <X className="w-6 h-6" />
-                                    </button>
-                                </div>
-
-                                <div className="flex items-center justify-between mb-6">
-                                    <button
-                                        onClick={() => changeMonth(-1)}
-                                        className="p-2 hover:bg-gray-100 rounded-lg transition"
-                                    >
-                                        <ChevronLeft className="w-6 h-6" />
-                                    </button>
-                                    <h3 className="text-xl font-bold text-gray-800">
-                                        {calendarMonth.getFullYear()}년 {calendarMonth.getMonth() + 1}월
-                                    </h3>
-                                    <button
-                                        onClick={() => changeMonth(1)}
-                                        className="p-2 hover:bg-gray-100 rounded-lg transition"
-                                    >
-                                        <ChevronRight className="w-6 h-6" />
-                                    </button>
-                                </div>
-                                
-                                <div className="grid grid-cols-7 gap-2">
-                                    {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
-                                        <div key={day} className={`text-center font-bold py-3 ${idx === 0 ? 'text-red-500' : idx === 6 ? 'text-blue-500' : 'text-gray-600'}`}>
-                                            {day}
-                                        </div>
-                                    ))}
-                                    
-                                    {generateCalendarDays().map((day, idx) => {
-                                        if (!day) return <div key={idx} />;
-                                        
-                                        const year = calendarMonth.getFullYear();
-                                        const month = calendarMonth.getMonth() + 1;
-                                        const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                        const increase = getDailyTotal(dateStr);
-                                        const isToday = dateStr === new Date().toISOString().split('T')[0];
-                                        const isSelected = dateStr === selectedDate;
-                                        const dayOfWeek = idx % 7;
-                                        
-                                        return (
-                                            <button
-                                                key={idx}
-                                                onClick={() => {
-                                                    setSelectedDate(dateStr);
-                                                    setShowCalendar(false);
-                                                }}
-                                                className={`p-3 rounded-xl text-center transition-all min-h-[70px] flex flex-col justify-center ${
-                                                    isSelected
-                                                        ? 'bg-blue-500 text-white shadow-xl transform scale-105'
-                                                        : isToday
-                                                        ? 'bg-yellow-100 hover:bg-yellow-200 border-2 border-yellow-400'
-                                                        : increase > 0
-                                                        ? 'bg-green-50 hover:bg-green-100'
-                                                        : 'hover:bg-gray-100'
-                                                }`}
-                                            >
-                                                <div className={`font-bold text-lg ${dayOfWeek === 0 && !isSelected ? 'text-red-500' : dayOfWeek === 6 && !isSelected ? 'text-blue-500' : ''}`}>
-                                                    {day}
-                                                </div>
-                                                {increase > 0 && (
-                                                    <div className={`text-xs mt-1 font-bold ${isSelected ? 'text-white' : 'text-green-600'}`}>
-                                                        +{increase > 999 ? `${(increase / 1000).toFixed(1)}k` : increase}
-                                                    </div>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-
-                                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-                                    <h4 className="font-bold text-gray-700 mb-2">💡 사용 팁</h4>
-                                    <ul className="text-sm text-gray-600 space-y-1">
-                                        <li>• 녹색 날짜: 조회수가 증가한 날</li>
-                                        <li>• 노란색 테두리: 오늘 날짜</li>
-                                        <li>• 파란색: 현재 선택된 날짜</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
+            const iframe = document.getElementById('player');
+            iframe.src = `https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=1`;
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<YouTubeViewTracker />);
+        function openInYoutube() {
+            const playlistId = document.getElementById('playlistId').value.trim();
+            if (!playlistId) {
+                alert('재생목록 ID를 입력해주세요!');
+                return;
+            }
+            window.open(`https://www.youtube.com/playlist?list=${playlistId}`, '_blank');
+        }
+
+        // 페이지 로드 시 자동으로 재생목록 시작
+        window.addEventListener('load', function() {
+            console.log('장민호 재생목록 플레이어가 로드되었습니다.');
+        });
     </script>
 </body>
 </html>
